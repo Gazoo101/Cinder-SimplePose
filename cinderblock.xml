@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cinder>
+<block
+	name="SimplePose"
+	id="org.libcinder.simplepose"
+	author="Cinder Project, Lasse Farnung Laursen"
+	license="BSD"
+	summary="Simple homography based pose-estimation."
+	core="true"
+	>
+	<sourcePattern>src/*.cpp</sourcePattern>
+	<sourcePattern>src/presenter/*.cpp</sourcePattern>
+	<sourcePattern>src/presenter/common/*.cpp</sourcePattern>
+	<headerPattern>src/*.h</headerPattern>
+	<headerPattern>src/presenter/*.h</headerPattern>
+	<headerPattern>src/presenter/common/*.h</headerPattern>
+	<includePath>src</includePath>
+</block>
+</cinder>
