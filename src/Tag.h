@@ -9,42 +9,38 @@
 #ifndef TAG
 #define TAG
 
+#include "cinder/Noncopyable.h"
 #include <vector>
+#include <bitset>
 
-struct Tag
+struct Tag : private cinder::Noncopyable
 {
-	Tag( unsigned char const &bitPatternSize, unsigned short const &id ) :
-		kmBitPatternSize( bitPatternSize ),
-		kmId( id ),
-		mBitPattern( new bool[bitPatternSize*bitPatternSize] )
+	Tag() :
+		kmId( 0 )
 	{
-		// Create bit layout
-		auto array = new bool[3][3]();
 
-		//mBitPattern = new bool[bitPatternSize][bitPatternSize];
 	}
 
-	bool getBit( unsigned char const &x, unsigned char const &y)
+	Tag( unsigned short const &id ) :
+		kmId( id )
 	{
-		return mBitPattern.get() + ( y * kmBitPatternSize ) + x;
+
 	}
+
+	// Move Operators!
+	Tag( Tag&& other ) :
+		kmId( other.kmId )
+	{
+	}
+	Tag& operator=( Tag&& ) { return *this; }
+
+
 
 	// Does rotating the tag 90Deg ever result in exactly the same pattern?
-	bool isSelfSymmetric()
-	{
-
-	}
-
-	std::vector<unsigned short> getInvalidatedTagIDs()
-	{
-
-	}
-
-	//bool mBitPattern;
-	std::unique_ptr<bool[]> mBitPattern;
+	virtual bool isSelfSymmetric() = 0;
+	virtual std::vector<unsigned short> getInvalidatedTagIDs() = 0;
 
 	unsigned short const kmId;
-	unsigned char const kmBitPatternSize;
 };
 
 #endif /* TAG */

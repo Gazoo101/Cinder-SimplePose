@@ -12,6 +12,9 @@ CiSimplePose::CiSimplePose()
 {
 	// RiAA principles
 
+	mTagRecognizer = std::unique_ptr<TagRecognizer>( new TagRecognizer(4) );
+
+
 }
 
 CiSimplePose::~CiSimplePose()

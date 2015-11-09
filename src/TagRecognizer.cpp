@@ -7,12 +7,24 @@
 */
 
 #include "TagRecognizer.h"
-#include "Tag.h"
+#include "TagBitPattern.h"
+#include "cinder/Log.h"
 
 TagRecognizer::TagRecognizer( unsigned char const &bitPatternSize ) :
 kmBitPatternSize( bitPatternSize )
 {
+	if ( kmBitPatternSize > kmMaxBitPattern )
+	{
+		CI_LOG_W( "Selected bit Pattern size (" << kmBitPatternSize << ") larger than max (" << kmMaxBitPattern << "), detection disabled." );
+		return;
+	}
+	else if ( kmBitPatternSize < kmMinBitPattern )
+	{
+		CI_LOG_W( "Selected bit Pattern size (" << kmBitPatternSize << ") smaller than min (" << kmMinBitPattern << "), detection disabled." );
+		return;
+	}
 
+	generateTags();
 }
 
 TagRecognizer::~TagRecognizer()
@@ -20,7 +32,31 @@ TagRecognizer::~TagRecognizer()
 
 }
 
-ci::Surface8uRef getTagTex( unsigned int const &numTags )
+void TagRecognizer::generateTags()
 {
-	
+	// For now generates MAX tags
+	unsigned int tagMaxId = 2^( kmBitPatternSize*kmBitPatternSize );
+
+	for ( unsigned int tagId = 0; tagId < tagMaxId; ++tagId )
+	{
+		auto tag = new TagBitPattern( kmBitPatternSize, tagId );
+
+		// Only add if Tag is NOT self-symmetric
+		if ( !tag->isSelfSymmetric() )
+		{
+			auto rotatedDupesIds = tag->getInvalidatedTagIDs();
+
+			for ( auto &dupeId : rotatedDupesIds )
+			{
+				mInvalidTags.push_back( dupeId );
+			}
+
+			mRecognizedTags.emplace_back( std::move( tag ) );
+		}
+	}
+}
+
+ci::Surface8uRef TagRecognizer::getTagTex( unsigned int const &numTags )
+{
+	return ci::Surface::create( 32, 32, true );
 }

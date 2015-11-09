@@ -32,9 +32,14 @@ private:
 
 	void generateTags();
 
-	std::vector<Tag> mRecognizedTags;
+	std::vector<std::unique_ptr<Tag>> mRecognizedTags;
+	//std::vector<Tag> mRecognizedTags;
+	std::vector<unsigned int> mInvalidTags;
 
 	unsigned char const kmBitPatternSize;
+
+	static unsigned char const kmMaxBitPattern = 6;
+	static unsigned char const kmMinBitPattern = 2;
 
 };
 
