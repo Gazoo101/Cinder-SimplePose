@@ -40,10 +40,16 @@ private:
 	void detectSquaresInBinary( ci::Surface8uRef surface );
 	void detectTagsInSquares( ci::Surface8uRef surface );
 
+	inline void processGrayscaleToBinaryPixel( ci::Surface8u::Iter & iter );
+
 	// Adaptive binarization variables
 	unsigned short const		kmBinaPixelWindow;
 	double const				kmBinaThresholdRelaxation;
 	std::unique_ptr<double>		mBinaPrevRowThresholdEstimate;
+
+	// Could be unsigned?
+	int mBinaPixelWindowEstimate;
+	int mBinaThreshold;
 
 	ci::Surface8uRef mIncomingGrayscale, mIncomingBinarized, mIncomingSquaresDetected, mIncomingTagsDetected;
 	ci::gl::Texture2dRef mTexGrayscale, mTexBinary, mTexSquares, mTexTags;
