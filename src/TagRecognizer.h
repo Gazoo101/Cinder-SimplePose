@@ -23,7 +23,7 @@ class TagRecognizer {
 
 public:
 
-	TagRecognizer( unsigned char const &bitPatternSize );
+	TagRecognizer( unsigned short const &bitPatternSize );
 	~TagRecognizer();
 
 	ci::Surface8uRef getTagTex( unsigned int const &numTags );
@@ -34,12 +34,12 @@ private:
 
 	std::vector<std::unique_ptr<Tag>> mRecognizedTags;
 	//std::vector<Tag> mRecognizedTags;
-	std::vector<unsigned int> mInvalidTags;
+	std::vector<unsigned long long> mInvalidTags;
 
-	unsigned char const kmBitPatternSize;
+	unsigned short const kmBitPatternSize;
 
-	static unsigned char const kmMaxBitPattern = 6;
-	static unsigned char const kmMinBitPattern = 2;
+	static unsigned short const kmMaxBitPattern = 6;
+	static unsigned short const kmMinBitPattern = 2;
 
 };
 

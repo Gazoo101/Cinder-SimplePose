@@ -10,7 +10,7 @@
 #include "TagBitPattern.h"
 #include "cinder/Log.h"
 
-TagRecognizer::TagRecognizer( unsigned char const &bitPatternSize ) :
+TagRecognizer::TagRecognizer( unsigned short const &bitPatternSize ) :
 kmBitPatternSize( bitPatternSize )
 {
 	if ( kmBitPatternSize > kmMaxBitPattern )

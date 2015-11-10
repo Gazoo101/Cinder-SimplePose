@@ -13,6 +13,8 @@
 #include <vector>
 #include <bitset>
 
+#include "cinder/gl/Texture.h"
+
 struct Tag : private cinder::Noncopyable
 {
 	Tag() :
@@ -21,7 +23,7 @@ struct Tag : private cinder::Noncopyable
 
 	}
 
-	Tag( unsigned short const &id ) :
+	Tag( unsigned long long const &id ) :
 		kmId( id )
 	{
 
@@ -34,13 +36,13 @@ struct Tag : private cinder::Noncopyable
 	}
 	Tag& operator=( Tag&& ) { return *this; }
 
-
+	virtual ci::gl::Texture2dRef getTagAsTexture() = 0;
 
 	// Does rotating the tag 90Deg ever result in exactly the same pattern?
 	virtual bool isSelfSymmetric() = 0;
-	virtual std::vector<unsigned short> getInvalidatedTagIDs() = 0;
+	virtual std::vector<unsigned long long> getInvalidatedTagIDs() = 0;
 
-	unsigned short const kmId;
+	unsigned long long const kmId;
 };
 
 #endif /* TAG */
