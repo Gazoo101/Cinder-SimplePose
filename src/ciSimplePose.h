@@ -9,9 +9,13 @@
 #ifndef CISIMPLEPOSE
 #define CISIMPLEPOSE
 
-#include "TagRecognizer.h"
 #include "cinder/Surface.h"
 #include "cinder/gl/Texture.h"
+
+// Forward declarations
+class TagRecognizer;
+class AdaptiveThresholdBinarization;
+class ContourDetector;
 
 class CiSimplePose {
 	
@@ -20,13 +24,11 @@ public:
 	CiSimplePose( unsigned int const & incomingImagesWidth, unsigned int const & incomingImagesHeight );
 	~CiSimplePose();
 
-
-
 	//getCameraMatrix();	- Todo. Use OpenCV for now.
 
 	void detectTags( ci::Surface8uRef surface );
 
-	ci::Surface8uRef getTagTex( unsigned int const &numTags ) { return mTagRecognizer->getTagTex( numTags ); };
+	inline ci::Surface8uRef getTagTex( unsigned int const &numTags );
 	
 	ci::gl::Texture2dRef getTextureGrayscale() { return mTexGrayscale; };
 	ci::gl::Texture2dRef getTextureBinary() { return mTexBinary; };
@@ -40,23 +42,16 @@ private:
 	void detectSquaresInBinary( ci::Surface8uRef surface );
 	void detectTagsInSquares( ci::Surface8uRef surface );
 
-	inline void processGrayscaleToBinaryPixel( ci::Surface8u::Iter & iter );
-
-	// Adaptive binarization variables
-	unsigned short const		kmBinaPixelWindow;
-	double const				kmBinaThresholdRelaxation;
-	std::unique_ptr<double>		mBinaPrevRowThresholdEstimate;
-
-	// Could be unsigned?
-	int mBinaPixelWindowEstimate;
-	int mBinaThreshold;
-
 	ci::Surface8uRef mIncomingGrayscale, mIncomingBinarized, mIncomingSquaresDetected, mIncomingTagsDetected;
 	ci::gl::Texture2dRef mTexGrayscale, mTexBinary, mTexSquares, mTexTags;
 
 	unsigned int const kmIncomingImgsWidth, kmIncomingImgsHeight;
 
 	std::unique_ptr<TagRecognizer> mTagRecognizer;
+
+	// Image Processing Objects
+	std::unique_ptr<AdaptiveThresholdBinarization> mBinarizer;
+	std::unique_ptr<ContourDetector> mSquareFinder;
 };
 
 #endif /* CISIMPLEPOSE */

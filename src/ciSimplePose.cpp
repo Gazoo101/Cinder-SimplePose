@@ -8,15 +8,20 @@
 
 #include "ciSimplePose.h"
 
-CiSimplePose::CiSimplePose(unsigned int const & incomingImagesWidth, unsigned int const & incomingImagesHeight) :
-	kmIncomingImgsWidth( incomingImagesWidth ),
-	kmIncomingImgsHeight( incomingImagesHeight ),
-	kmBinaPixelWindow( incomingImagesWidth / 4 ),	// C++ automatically floors integer division
-	kmBinaThresholdRelaxation( 1.0f )
-{
-	mBinaPrevRowThresholdEstimate = std::unique_ptr<double>( new double[incomingImagesWidth] );
+#include "TagRecognizer.h"
 
+// Image Processing
+#include "image/AdaptiveThresholdBinarization.h"
+#include "image/ContourDetector.h"
+
+CiSimplePose::CiSimplePose( unsigned int const & incomingImagesWidth, unsigned int const & incomingImagesHeight ) :
+	kmIncomingImgsWidth( incomingImagesWidth ),
+	kmIncomingImgsHeight( incomingImagesHeight )
+{
 	// Raii principles
+	mBinarizer = std::unique_ptr<AdaptiveThresholdBinarization>( new AdaptiveThresholdBinarization( incomingImagesWidth, incomingImagesHeight ) );
+	mSquareFinder = std::unique_ptr<ContourDetector>( new ContourDetector( incomingImagesWidth, incomingImagesHeight ) );
+
 	mTagRecognizer = std::unique_ptr<TagRecognizer>( new TagRecognizer(4) );
 
 	// Setup Detection Surfaces
@@ -42,6 +47,8 @@ CiSimplePose::~CiSimplePose()
 
 }
 
+ci::Surface8uRef CiSimplePose::getTagTex( unsigned int const &numTags ) { return mTagRecognizer->getTagTex( numTags ); };
+
 void CiSimplePose::detectTags( ci::Surface8uRef surface )
 {
 	// Convert to grayscale
@@ -49,7 +56,8 @@ void CiSimplePose::detectTags( ci::Surface8uRef surface )
 	mTexGrayscale->update( *mIncomingGrayscale.get() );
 
 	// Apply adaptive thresholding
-	processGrayscaleToBinary( mIncomingGrayscale );
+	mIncomingBinarized = mBinarizer->process( mIncomingGrayscale );
+	//processGrayscaleToBinary( mIncomingGrayscale );
 	mTexBinary->update( *mIncomingBinarized.get() );
 
 	// Detect squares
@@ -73,77 +81,15 @@ void CiSimplePose::processIncomingToGrayscale( ci::Surface8uRef surface )
 	mIncomingGrayscale = ci::Surface8u::create( grayscale );
 }
 
-void CiSimplePose::processGrayscaleToBinaryPixel( ci::Surface8u::Iter & surfaceIter )
-{
-	mBinaPixelWindowEstimate = mBinaPixelWindowEstimate - ( mBinaPixelWindowEstimate / kmBinaPixelWindow ) + ( surfaceIter.r() );	// could be r,g, or b
-
-	// Improved threshold
-	mBinaThreshold = ( ( ( mBinaPrevRowThresholdEstimate.get()[surfaceIter.x()] + mBinaPixelWindowEstimate ) / 2.0f ) / kmBinaPixelWindow )*kmBinaThresholdRelaxation;
-
-	int estimationResult = 255 * ( ( surfaceIter.r() ) >= mBinaThreshold );
-	//*pBin++ = estimationResult;
-	surfaceIter.r() = estimationResult;
-	surfaceIter.g() = estimationResult;
-	surfaceIter.b() = estimationResult;
-
-	mBinaPrevRowThresholdEstimate.get()[surfaceIter.x()] = mBinaPixelWindowEstimate;
-}
-
-void CiSimplePose::processGrayscaleToBinary( ci::Surface8uRef surface )
-{
-	/* 
-	(Brief) How this algorithm works:
-	
-	Based on: Pierre D. Wellner. Adaptive thresholding for the digitaldesk. Technical Report EPC-1993-110, Rank Xerox Research Centre, Cambridge Laboratory, 61 Regent Street, Cambridge CB2 1AB, 1993.
-	
-	The threshold estimate starts at 0. At every pixel, the threshold is re-evaluated with the current pixel
-	added as value, and an estimate of the dropped pixel subtracted (to save memory). Each evaluation is then an
-	average of "all the pixel values in the window" (+ the values of the last row averaged together)
-	divided by the pixel window, and then "lessened by the threshold". This value then helps determine if the next pixel
-	should be considered foreground or background.
-	*/
-
-	mBinaPixelWindowEstimate = 0;
-	mBinaThreshold = 0;
-	std::memset( mBinaPrevRowThresholdEstimate.get(), 0, kmIncomingImgsWidth ); // Not super necessary
-
-	auto surfaceIter = surface->getIter();
-
-	// Draw border
-	while ( surfaceIter.line() )
-	{
-		if ( surfaceIter.y() % 2 )
-		{
-			// Even Rows
-			while ( surfaceIter.pixel() )
-			{
-				processGrayscaleToBinaryPixel( surfaceIter );
-			}
-		}
-		else {
-			// Un-even rows
-
-			// Cinder doesn't support reverse iteration so we'll have to work a little internal-pointer majik here.
-			// Set interal pixel pointer to last pixel on row
-			surfaceIter.pixel();
-			surfaceIter.mPtr += ( surfaceIter.mWidth - 1 ) * surfaceIter.mInc;
-			surfaceIter.mX += surfaceIter.mEndX - 1;
-
-			while ( surfaceIter.mX >= surfaceIter.mStartX )
-			{
-				processGrayscaleToBinaryPixel( surfaceIter );
-
-				surfaceIter.mPtr -= surfaceIter.mInc;
-				--surfaceIter.mX;
-			}
-		}
-	}
-
-	mIncomingBinarized = surface;
-}
-
 void CiSimplePose::detectSquaresInBinary( ci::Surface8uRef surface )
 {
+	/*
+	How the algorithm works:
+
+	Based on: Satoshi Suzuki and Keiichi Abe, Topological Structural Analysis of Digitized Binary Images by Border Following
+	
+	
+	*/
 
 }
 
