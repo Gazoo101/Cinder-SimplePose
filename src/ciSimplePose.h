@@ -32,18 +32,20 @@ public:
 	
 	ci::gl::Texture2dRef getTextureGrayscale() { return mTexGrayscale; };
 	ci::gl::Texture2dRef getTextureBinary() { return mTexBinary; };
+	ci::gl::Texture2dRef getTextureContours() { return mTexContours; };
 	ci::gl::Texture2dRef getTextureSquares() { return mTexSquares; };
 	ci::gl::Texture2dRef getTextureTags() { return mTexTags; };
 
 private:
 
-	void processIncomingToGrayscale( ci::Surface8uRef surface );
+	ci::Channel8uRef processIncomingToGrayscale( ci::Surface8uRef surface );
 	void processGrayscaleToBinary( ci::Surface8uRef surface );
 	void detectSquaresInBinary( ci::Surface8uRef surface );
 	void detectTagsInSquares( ci::Surface8uRef surface );
 
-	ci::Surface8uRef mIncomingGrayscale, mIncomingBinarized, mIncomingSquaresDetected, mIncomingTagsDetected;
-	ci::gl::Texture2dRef mTexGrayscale, mTexBinary, mTexSquares, mTexTags;
+	ci::Channel8uRef mImgGrayScale, mImgBinary;		// These images only require a single color channel
+	ci::Surface8uRef mImgContours, mImgSquares, mImgTags;			// These images 'need' color to better differentiate detected elements
+	ci::gl::Texture2dRef mTexGrayscale, mTexBinary, mTexContours, mTexSquares, mTexTags;
 
 	unsigned int const kmIncomingImgsWidth, kmIncomingImgsHeight;
 
@@ -51,7 +53,7 @@ private:
 
 	// Image Processing Objects
 	std::unique_ptr<AdaptiveThresholdBinarization> mBinarizer;
-	std::unique_ptr<ContourDetector> mSquareFinder;
+	std::unique_ptr<ContourDetector> mContourFinder;
 };
 
 #endif /* CISIMPLEPOSE */

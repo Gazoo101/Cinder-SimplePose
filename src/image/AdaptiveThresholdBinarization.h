@@ -19,11 +19,11 @@ public:
 	AdaptiveThresholdBinarization( unsigned int const & incomingImagesWidth, unsigned int const & incomingImagesHeight );
 	~AdaptiveThresholdBinarization();
 
-	ci::Surface8uRef process( ci::Surface8uRef surface );
+	ci::Channel8uRef process( ci::Channel8uRef surface );
 
 private:
 
-	inline void processPixel( ci::Surface8u::Iter & iter );
+	inline void processPixel( ci::Channel8u::Iter & iter );
 
 	// Adaptive binarization variables
 	unsigned short const		kmBinaPixelWindow;
@@ -35,7 +35,7 @@ private:
 	int mBinaThreshold;
 
 
-	ci::Surface8uRef mImageProcessed;
+	ci::Channel8uRef mImageProcessed;
 	unsigned int const kmIncomingImgsWidth, kmIncomingImgsHeight;
 
 };

@@ -16,7 +16,7 @@ AdaptiveThresholdBinarization::AdaptiveThresholdBinarization(unsigned int const 
 {
 	mBinaPrevRowThresholdEstimate = std::unique_ptr<double>( new double[incomingImagesWidth] );
 
-	mImageProcessed = ci::Surface8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight, false );
+	mImageProcessed = ci::Channel8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight );
 
 }
 
@@ -25,22 +25,20 @@ AdaptiveThresholdBinarization::~AdaptiveThresholdBinarization()
 
 }
 
-void AdaptiveThresholdBinarization::processPixel( ci::Surface8u::Iter & surfaceIter )
+void AdaptiveThresholdBinarization::processPixel( ci::Channel8u::Iter & surfaceIter )
 {
-	mBinaPixelWindowEstimate = mBinaPixelWindowEstimate - ( mBinaPixelWindowEstimate / kmBinaPixelWindow ) + ( surfaceIter.r() );	// could be r,g, or b
+	mBinaPixelWindowEstimate = mBinaPixelWindowEstimate - ( mBinaPixelWindowEstimate / kmBinaPixelWindow ) + ( surfaceIter.v() );
 
 	// Improved threshold
 	mBinaThreshold = ( ( ( mBinaPrevRowThresholdEstimate.get()[surfaceIter.x()] + mBinaPixelWindowEstimate ) / 2.0f ) / kmBinaPixelWindow )*kmBinaThresholdRelaxation;
 
-	int estimationResult = 255 * ( ( surfaceIter.r() ) >= mBinaThreshold );
-	surfaceIter.r() = estimationResult;
-	surfaceIter.g() = estimationResult;
-	surfaceIter.b() = estimationResult;
+	int estimationResult = 255 * ( ( surfaceIter.v() ) >= mBinaThreshold );
+	surfaceIter.v() = estimationResult;
 
 	mBinaPrevRowThresholdEstimate.get()[surfaceIter.x()] = mBinaPixelWindowEstimate;
 }
 
-ci::Surface8uRef AdaptiveThresholdBinarization::process( ci::Surface8uRef surface )
+ci::Channel8uRef AdaptiveThresholdBinarization::process( ci::Channel8uRef surface )
 {
 	/*
 	(Brief) How this algorithm works:
