@@ -17,8 +17,43 @@ ContourDetector::ContourDetector(unsigned int const & incomingImagesWidth, unsig
 	kmImgBorderedWidth( incomingImagesWidth + 2),
 	kmImgBorderedHeight( incomingImagesHeight + 2 )
 {
+	// Neighborhood searchers
+
+	// 8-Neighborhood Search
+	mNB8CW.reserve( 8 );
+	mNB8CCW.reserve( 8 );
+	// Left, Up-Left, Up, Up-Right, Right, Down-Right, Down, Down-Left
+	mNB8CW = { ci::vec2( -1, 0 ), ci::vec2( -1, -1 ), ci::vec2( 0, -1 ), ci::vec2( 1, -1 ), ci::vec2( 1, 0 ), ci::vec2( 1, 1 ), ci::vec2( -1, 1 ) };
+	// Left, Down-Left, Down, Down-Right, Right, Up-Right, Up, Up-Left,
+	mNB8CCW = { ci::vec2( -1, 0 ), ci::vec2( -1, 1 ), ci::vec2( 1, 1 ), ci::vec2( 1, 0 ), ci::vec2( 1, -1 ), ci::vec2( 0, -1 ), ci::vec2( -1, -1 ), };
+
+	// 4-Neighborhood Search
+	mNB4CW.reserve( 4 );
+	mNB4CCW.reserve( 4 );
+
+	// Left, Up, Right, Down
+	mNB4CW = { ci::vec2( -1, 0 ), ci::vec2( 0, -1 ), ci::vec2( 1, 0 ), ci::vec2( 0, 1 ) };
+	// Left, Down, Right, Up
+	mNB4CCW = { ci::vec2( -1, 0 ), ci::vec2( 0, 1 ), ci::vec2( 1, 0 ), ci::vec2( 0, -1 ) };
+
+
+	std::vector<double> cpp11vector2 = { 32.0, 6.003, -0.1 };
+	std::vector<ci::vec2> test = { ci::vec2( 0, 0 ), ci::vec2( 3, 4 ) };
+
+
 	mImageProcessed = ci::Surface8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight, false );
 	mImageProcessedBordered = ci::Surface8u::create( kmImgBorderedWidth, kmImgBorderedHeight, false );
+	mImageDebug = ci::Channel8u::create( kmImgBorderedWidth, kmImgBorderedHeight );
+
+	//auto chanIter = mImageDebug->getIter();
+
+	//while ( chanIter.line() )
+	//{
+	//	while ( chanIter.pixel() )
+	//	{
+	//		chanIter.v() = 0;// ci::randInt( 0, 255 );
+	//	}
+	//}
 
 	mContourMap = std::unique_ptr<int>( new int[kmImgBorderedWidth * kmImgBorderedHeight] );
 }
@@ -30,20 +65,36 @@ ContourDetector::~ContourDetector()
 
 void ContourDetector::processBinaryImageIntoContourBaseMap( ci::Channel8uRef surface, std::unique_ptr<int> &contourMap )
 {
-	// Set image frame of 1's
-	std::memset( contourMap.get(), 1, kmImgBorderedWidth );		// Top Row
-	std::memset( contourMap.get() + ( ( kmImgBorderedHeight - 1 ) * kmImgBorderedWidth ), 1, kmImgBorderedWidth );	// Bottom Row
+	// Top / Bottom
+	for ( unsigned int i = 0; i < kmImgBorderedWidth; ++i )
+	{
+		contourMap.get()[i] = 1;															// Top
+		contourMap.get()[( kmImgBorderedWidth * ( kmImgBorderedHeight - 1 ) ) + i] = 1;		// Bottom
+	}
 
-	// Left/right frame
-	for ( unsigned int i = 0; i < kmIncomingImgsHeight; ++i )
+	// Left / Right
+	for ( unsigned int i = 1; i < kmImgBorderedHeight - 1; ++i )
 	{
 		contourMap.get()[( i * kmImgBorderedWidth ) + 0] = 1;	// Left Column
 		contourMap.get()[( i * kmImgBorderedWidth ) + kmImgBorderedWidth - 1] = 1;	// Right Column
 	}
 
+	// Copy channel on to center of contour map
+	auto surfaceIter = surface->getIter();
+
+	while ( surfaceIter.line() )
+	{
+		while ( surfaceIter.pixel() )
+		{
+			contourMap.get()[ (kmImgBorderedWidth * (surfaceIter.y() + 1)) + 1 + surfaceIter.x() ] = surfaceIter.v() / 255;
+		}
+	}
+
+	int test = contourMap.get()[ (kmImgBorderedWidth * kmImgBorderedHeight) - 1];
+
+
 	// Convert into temp surface for show...
-	auto chan = ci::Channel8u::create( kmImgBorderedWidth, kmImgBorderedHeight );
-	auto iter = chan->getIter();
+	auto iter = mImageDebug->getIter();
 
 	auto index = 0;
 	while ( iter.line() )
@@ -55,15 +106,6 @@ void ContourDetector::processBinaryImageIntoContourBaseMap( ci::Channel8uRef sur
 			++index;
 		}
 	}
-
-	//auto channel = ci::Channel8u::create( kmIncomingImgsWidth + 2, kmIncomingImgsWidth + 2, sizeof( int ) * ( kmIncomingImgsWidth + 2 ), 1, reinterpret_cast<uint8_t*>( *contourMap.get() ) ); //contourMap.get()
-
-	mImageProcessedBordered = ci::Surface8u::create( *chan.get() );
-
-	// Convert into a surface for now
-
-	//ci::Surface8u::create()
-
 }
 
 ci::Surface8uRef ContourDetector::process( ci::Channel8uRef surface )
@@ -81,43 +123,63 @@ ci::Surface8uRef ContourDetector::process( ci::Channel8uRef surface )
 	// find them contours!
 	mContourCounter = 1;
 	mLatestBorderEncountered = 1;
-	mLastPixelValue = mImageProcessedBordered->getPixel( ci::ivec2(0,0) ).r;
+	//mLastPixelValue = mImageProcessedBordered->getPixel( ci::ivec2(0,0) ).r;
 
 	/* At the start of the algorithm, a frame surrounds the entire image with value 1. Create an
 	iterator to only iterate over this inner portion of the image. */
-	auto partSurfaceIter = ci::Channel8u::Iter( *surface.get(), ci::Area( 1, 1, kmIncomingImgsWidth, kmIncomingImgsHeight ) );
+	//auto partSurfaceIter = ci::Channel8u::Iter( *surface.get(), ci::Area( 1, 1, kmIncomingImgsWidth, kmIncomingImgsHeight ) );
 
 	//auto surfaceIter = mImageProcessedBordered->getIter();
 
-	while ( partSurfaceIter.line() )
+
+	mLastPixelValue = mContourMap.get()[0];
+
+	// There's no need to check the image frame, thus go from 1 to imgDim -1
+	for ( unsigned int y = 1; y < kmImgBorderedHeight - 1; ++y )
 	{
 		mLatestBorderEncountered = 1;
 
-		while ( partSurfaceIter.pixel() )
+		for ( unsigned int x = 1; x < kmImgBorderedWidth - 1; ++x )
 		{
-			auto x = partSurfaceIter.x();
-			auto y = partSurfaceIter.y();
+			int pixelValue = mContourMap.get()[ posToIndex( x, y ) ];
 
+			if ( pixelValue != 0 )
+			{
+				if ( ( pixelValue == 1 ) && ( mLastPixelValue == 0 ) )
+				{
+					annotateContour( ci::ivec2( x, y ), Contour::TYPE::OUTER );
 
+				}
+				else if ( ( pixelValue >= 1 ) && ( mContourMap.get()[posToIndex( x+1, y )] == 0) )
+				{
+					annotateContour( ci::ivec2( x, y ), Contour::TYPE::HOLE );
+				}
+				else if ( pixelValue != 1 )
+				{
+					mLatestBorderEncountered = std::abs( pixelValue );
+				}
+				else {
+					// We should NEVER reach this
+					assert( 0 );
+				}
 
-			// if curPixel = 1, and last pixel = 0
-			// then curPixel is part of new border
-			// increment mContourCounter and start border follow procedure
-			// pass last pixel pos to newContourDetected();
-			
-			//followBorder();
+			}
 
-			// if ...
+			//posToIndex( x, y );
 
-
-
+			mLastPixelValue = pixelValue;
 		}
 	}
 
 }
 
-void ContourDetector::followBorder( ci::ivec2 const &pos )
+void ContourDetector::annotateContour( ci::ivec2 const &pos, Contour::TYPE borderType )
 {
+
+
+
+
+
 
 }
 

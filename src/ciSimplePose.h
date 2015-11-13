@@ -35,6 +35,7 @@ public:
 	ci::gl::Texture2dRef getTextureContours() { return mTexContours; };
 	ci::gl::Texture2dRef getTextureSquares() { return mTexSquares; };
 	ci::gl::Texture2dRef getTextureTags() { return mTexTags; };
+	ci::gl::Texture2dRef getTextureDebug() { return mTexDebug; };
 
 private:
 
@@ -45,7 +46,7 @@ private:
 
 	ci::Channel8uRef mImgGrayScale, mImgBinary;		// These images only require a single color channel
 	ci::Surface8uRef mImgContours, mImgSquares, mImgTags;			// These images 'need' color to better differentiate detected elements
-	ci::gl::Texture2dRef mTexGrayscale, mTexBinary, mTexContours, mTexSquares, mTexTags;
+	ci::gl::Texture2dRef mTexGrayscale, mTexBinary, mTexContours, mTexSquares, mTexTags, mTexDebug;
 
 	unsigned int const kmIncomingImgsWidth, kmIncomingImgsHeight;
 

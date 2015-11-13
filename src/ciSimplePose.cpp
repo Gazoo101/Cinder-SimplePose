@@ -10,6 +10,9 @@
 
 #include "TagRecognizer.h"
 
+#include "cinder/Log.h"
+#include "cinder/Rand.h"
+
 // Image Processing
 #include "image/AdaptiveThresholdBinarization.h"
 #include "image/ContourDetector.h"
@@ -25,27 +28,32 @@ CiSimplePose::CiSimplePose( unsigned int const & incomingImagesWidth, unsigned i
 	mTagRecognizer = std::unique_ptr<TagRecognizer>( new TagRecognizer(4) );
 
 	// Setup Detection Surfaces
-	//mIncomingGrayscale = ci::Surface8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight, false );
-	//mIncomingBinarized = ci::Surface8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight, false );
-	//mIncomingSquaresDetected = ci::Surface8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight, false );
-	//mIncomingTagsDetected = ci::Surface8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight, false );
-
 	mImgGrayScale = ci::Channel8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight );
 	mImgBinary = ci::Channel8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight );
 	mImgContours = ci::Surface8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight, false );
 	mImgSquares = ci::Surface8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight, false );
 	mImgTags = ci::Surface8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight, false );
 
-	//ci::Surface8u::create()
+	auto temp = ci::Channel8u::create( kmIncomingImgsWidth + 2, kmIncomingImgsHeight + 2);
 
 	// Associated debug textures
-	mTexGrayscale = ci::gl::Texture2d::create( kmIncomingImgsWidth, kmIncomingImgsHeight );
-	mTexBinary = ci::gl::Texture2d::create( kmIncomingImgsWidth, kmIncomingImgsHeight );
-	mTexContours = ci::gl::Texture2d::create( kmIncomingImgsWidth, kmIncomingImgsHeight );
-	mTexSquares = ci::gl::Texture2d::create( kmIncomingImgsWidth, kmIncomingImgsHeight );
-	mTexTags = ci::gl::Texture2d::create( kmIncomingImgsWidth, kmIncomingImgsHeight );
+	mTexGrayscale = ci::gl::Texture2d::create( *mImgGrayScale );
+	mTexBinary = ci::gl::Texture2d::create( *mImgBinary );
+	mTexContours = ci::gl::Texture2d::create( *mImgContours );
+	mTexSquares = ci::gl::Texture2d::create( *mImgSquares );
+	mTexTags = ci::gl::Texture2d::create( *mImgTags );
 
+	mTexDebug = ci::gl::Texture2d::create( *temp );
 
+	auto chanIter = mImgBinary->getIter();
+
+	while ( chanIter.line() )
+	{
+		while ( chanIter.pixel() )
+		{
+			chanIter.v() = ci::randInt( 0, 255 );
+		}
+	}
 }
 
 CiSimplePose::~CiSimplePose()
@@ -59,19 +67,43 @@ ci::Surface8uRef CiSimplePose::getTagTex( unsigned int const &numTags ) { return
 void CiSimplePose::detectTags( ci::Surface8uRef surface )
 {
 	// Convert to grayscale
-	auto imgGrayScale = ci::Channel8u::create( *surface.get() );
-	auto graySurf = ci::Surface8u::create( *imgGrayScale.get() );		// Work-around for Cinder bug...
-	mTexGrayscale->update( *graySurf.get() );
+	auto imgGrayScale = ci::Channel8u::create( *surface );
+	mTexGrayscale->update( *imgGrayScale );
 
-	//// Apply adaptive thresholding
+	// Apply adaptive thresholding
 	mImgBinary = mBinarizer->process( imgGrayScale );
-	auto binSurf = ci::Surface8u::create( *mImgBinary.get() );
-	mTexBinary->update( *binSurf.get() );
+	mTexBinary->update( *mImgBinary );
 
-	//// Find Contours
+	// Find Contours
 	mImgContours = mContourFinder->process( mImgBinary );
-	auto conSurf = ci::Surface8u::create( *mImgContours.get() );
-	mTexContours->update( *conSurf.get() );
+
+	// Temp Debugging
+	mTexDebug->update( *mContourFinder->getDebugImg() );
+
+	//mImgBinary = mContourFinder->getDebugImg();
+
+	//auto chanIter = mImgBinary->getIter();
+
+	//while ( chanIter.line() )
+	//{
+	//	while ( chanIter.pixel() )
+	//	{
+	//		CI_LOG_V("insanity pixel value " << chanIter.v() );
+	//	}
+	//}
+	
+
+	
+
+	// Debugs
+	//mImgBinary = mContourFinder->getDebugImg();
+	
+
+	mTexContours->update( *mImgContours );
+	
+	
+	
+	
 	//mContourFinder->process( mImgBinary );
 
 	// Detect squares

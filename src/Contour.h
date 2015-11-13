@@ -25,6 +25,11 @@ struct Contour {
 	{
 	};
 
+	enum TYPE {
+		OUTER,
+		HOLE
+	};
+
 	std::list<int> mCoordsComplex;
 	std::vector<int> mCoordsSimple;
 

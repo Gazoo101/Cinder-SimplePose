@@ -10,8 +10,7 @@
 #define CONTOURDETECTOR
 
 #include "cinder/Surface.h"
-
-struct Contour;
+#include "Contour.h"	// Required due to enum
 
 class ContourDetector {
 
@@ -22,15 +21,18 @@ public:
 
 	ci::Surface8uRef process( ci::Channel8uRef surface );
 
+	ci::Channel8uRef getDebugImg() { return mImageDebug; }
+
 private:
 
 	void processBinaryImageIntoContourBaseMap( ci::Channel8uRef channel, std::unique_ptr<int> &contourMap );
 
-	void followBorder( ci::ivec2 const &pos );
+	void annotateContour( ci::ivec2 const &pos, Contour::TYPE borderType );
 
 	void processBordersToContours();
 
-	inline unsigned int posToIndex( ci::ivec2 const &pos ) { return ( pos.y * kmImgBorderedWidth ) + pos.x; };
+	inline unsigned int const posToIndex( ci::ivec2 const &pos ) { return ( pos.y * kmImgBorderedWidth ) + pos.x; };
+	inline unsigned int const posToIndex( unsigned int const & x, unsigned int const & y ) { return ( y * kmImgBorderedWidth ) + x; };
 
 	unsigned int mContourCounter;
 	unsigned int mLatestBorderEncountered;
@@ -39,9 +41,13 @@ private:
 	ci::Surface8uRef mImageProcessed;
 	ci::Surface8uRef mImageProcessedBordered;
 
+	ci::Channel8uRef mImageDebug;
+
 	// Using ci::Channel seems ideal, but we need signed integers to differentiate between outer/inner borders :/
 	std::unique_ptr<int> mContourMap;
 	std::vector<Contour> mContours;
+
+	std::vector<ci::ivec2> mNB8CW, mNB8CCW, mNB4CW, mNB4CCW;
 
 	unsigned int const kmIncomingImgsWidth, kmIncomingImgsHeight;
 	unsigned int const kmImgBorderedWidth, kmImgBorderedHeight;
