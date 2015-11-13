@@ -74,6 +74,9 @@ void CiSimplePose::detectTags( ci::Surface8uRef surface )
 	mImgBinary = mBinarizer->process( imgGrayScale );
 	mTexBinary->update( *mImgBinary );
 
+	// Test Contour'r
+	mContourFinder->testProcess();
+	return;
 	// Find Contours
 	mImgContours = mContourFinder->process( mImgBinary );
 

@@ -15,10 +15,20 @@
 
 struct Contour {
 
-	Contour()
+	Contour() :
+		mId(0),
+		mParentContourId( 0 )
 	{
 		// Each contour should ideally have its own unique color
 		mColor = ci::Color( ci::CM_HSV, ci::vec3( ci::Rand::randFloat(), 1, 1) );
+	};
+
+	Contour( int const & id, int const & parentId ) :
+		mId( id ),
+		mParentContourId( parentId )
+	{
+		// Each contour should ideally have its own unique color
+		mColor = ci::Color( ci::CM_HSV, ci::vec3( ci::Rand::randFloat(), 1, 1 ) );
 	};
 
 	~Contour()
@@ -29,6 +39,9 @@ struct Contour {
 		OUTER,
 		HOLE
 	};
+
+	int const mId;
+	int const mParentContourId;
 
 	std::list<int> mCoordsComplex;
 	std::vector<int> mCoordsSimple;

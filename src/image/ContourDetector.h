@@ -21,13 +21,18 @@ public:
 
 	ci::Surface8uRef process( ci::Channel8uRef surface );
 
-	ci::Channel8uRef getDebugImg() { return mImageDebug; }
+	ci::Channel8uRef getDebugImg() { return mImageDebug; };
+
+	void testProcess();
 
 private:
 
+	void createContourMapFrame( std::unique_ptr<int> &contourMap, unsigned int const & width, unsigned int const & height );
+	void printContourMapAscii( std::unique_ptr<int> &contourMap, unsigned int const & width, unsigned int const & height );
+
 	void processBinaryImageIntoContourBaseMap( ci::Channel8uRef channel, std::unique_ptr<int> &contourMap );
 
-	void annotateContour( ci::ivec2 const &pos, Contour::TYPE borderType );
+	Contour annotateContour( ci::ivec2 const &pos, Contour::TYPE borderType );
 
 	void processBordersToContours();
 
@@ -36,7 +41,7 @@ private:
 
 	unsigned int mContourCounter;
 	unsigned int mLatestBorderEncountered;
-	unsigned int mLastPixelValue;
+	//unsigned int mLastPixelValue;
 
 	ci::Surface8uRef mImageProcessed;
 	ci::Surface8uRef mImageProcessedBordered;
