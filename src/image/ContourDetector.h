@@ -12,6 +12,8 @@
 #include "cinder/Surface.h"
 #include "Contour.h"	// Required due to enum
 
+class ContourMap;
+
 class ContourDetector {
 
 public:
@@ -48,11 +50,10 @@ private:
 
 	ci::Channel8uRef mImageDebug;
 
-	// Using ci::Channel seems ideal, but we need signed integers to differentiate between outer/inner borders :/
-	std::unique_ptr<int> mContourMap;
+	std::unique_ptr<ContourMap> mContourMap;
 	std::vector<Contour> mContours;
 
-	std::vector<ci::ivec2> mNB8CW, mNB8CCW, mNB4CW, mNB4CCW;
+	//std::vector<ci::ivec2> mNB8CW, mNB8CCW, mNB4CW, mNB4CCW;
 
 	unsigned int const kmIncomingImgsWidth, kmIncomingImgsHeight;
 	unsigned int const kmImgBorderedWidth, kmImgBorderedHeight;

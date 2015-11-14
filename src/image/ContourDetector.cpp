@@ -7,10 +7,11 @@
 */
 
 #include "ContourDetector.h"
+#include "ContourMap.h"
 #include "Contour.h"
 
-#include "cinder/Log.h"	// Temp
-#include <sstream>
+//#include "cinder/Log.h"	// Temp
+//#include <sstream>
 
 #include "psimpl_v7_src/psimpl.h"
 
@@ -20,25 +21,7 @@ ContourDetector::ContourDetector(unsigned int const & incomingImagesWidth, unsig
 	kmImgBorderedWidth( incomingImagesWidth + 2),
 	kmImgBorderedHeight( incomingImagesHeight + 2 )
 {
-	// Neighborhood searchers
-
-	// 8-Neighborhood Search
-	mNB8CW.reserve( 8 );
-	mNB8CCW.reserve( 8 );
-	// Left, Up-Left, Up, Up-Right, Right, Down-Right, Down, Down-Left
-	mNB8CW = { ci::vec2( -1, 0 ), ci::vec2( -1, -1 ), ci::vec2( 0, -1 ), ci::vec2( 1, -1 ), ci::vec2( 1, 0 ), ci::vec2( 1, 1 ), ci::vec2( -1, 1 ) };
-	// Left, Down-Left, Down, Down-Right, Right, Up-Right, Up, Up-Left,
-	mNB8CCW = { ci::vec2( -1, 0 ), ci::vec2( -1, 1 ), ci::vec2( 1, 1 ), ci::vec2( 1, 0 ), ci::vec2( 1, -1 ), ci::vec2( 0, -1 ), ci::vec2( -1, -1 ), };
-
-	// 4-Neighborhood Search
-	mNB4CW.reserve( 4 );
-	mNB4CCW.reserve( 4 );
-
-	// Left, Up, Right, Down
-	mNB4CW = { ci::vec2( -1, 0 ), ci::vec2( 0, -1 ), ci::vec2( 1, 0 ), ci::vec2( 0, 1 ) };
-	// Left, Down, Right, Up
-	mNB4CCW = { ci::vec2( -1, 0 ), ci::vec2( 0, 1 ), ci::vec2( 1, 0 ), ci::vec2( 0, -1 ) };
-
+	mContourMap = std::unique_ptr<ContourMap>( new ContourMap( kmImgBorderedWidth, kmImgBorderedHeight) );
 
 	std::vector<double> cpp11vector2 = { 32.0, 6.003, -0.1 };
 	std::vector<ci::vec2> test = { ci::vec2( 0, 0 ), ci::vec2( 3, 4 ) };
@@ -48,19 +31,6 @@ ContourDetector::ContourDetector(unsigned int const & incomingImagesWidth, unsig
 	mImageProcessedBordered = ci::Surface8u::create( kmImgBorderedWidth, kmImgBorderedHeight, false );
 	mImageDebug = ci::Channel8u::create( kmImgBorderedWidth, kmImgBorderedHeight );
 
-	//auto chanIter = mImageDebug->getIter();
-
-	//while ( chanIter.line() )
-	//{
-	//	while ( chanIter.pixel() )
-	//	{
-	//		chanIter.v() = 0;// ci::randInt( 0, 255 );
-	//	}
-	//}
-
-	mContourMap = std::unique_ptr<int>( new int[kmImgBorderedWidth * kmImgBorderedHeight] );
-
-	CI_LOG_I("Crash city");
 }
 
 ContourDetector::~ContourDetector()
@@ -68,22 +38,7 @@ ContourDetector::~ContourDetector()
 
 }
 
-void ContourDetector::createContourMapFrame( std::unique_ptr<int> &contourMap, unsigned int const & width, unsigned int const & height )
-{
-	// Top / Bottom
-	for ( unsigned int i = 0; i < width; ++i )
-	{
-		contourMap.get()[i] = 1;									// Top
-		contourMap.get()[( width * ( height - 1 ) ) + i] = 1;		// Bottom
-	}
 
-	// Left / Right
-	for ( unsigned int i = 1; i < height - 1; ++i )
-	{
-		contourMap.get()[( i * width ) + 0] = 1;			// Left Column
-		contourMap.get()[( i * width ) + width - 1] = 1;	// Right Column
-	}
-}
 
 void ContourDetector::processBinaryImageIntoContourBaseMap( ci::Channel8uRef surface, std::unique_ptr<int> &contourMap )
 {
@@ -103,101 +58,56 @@ void ContourDetector::processBinaryImageIntoContourBaseMap( ci::Channel8uRef sur
 	int test = contourMap.get()[ (kmImgBorderedWidth * kmImgBorderedHeight) - 1];
 
 
-	// Convert into temp surface for show...
-	auto iter = mImageDebug->getIter();
+	//// Convert into temp surface for show...
+	//auto iter = mImageDebug->getIter();
 
-	auto index = 0;
-	while ( iter.line() )
-	{
-		while ( iter.pixel() )
-		{
-			iter.v() = mContourMap.get()[index] * 255;
+	//auto index = 0;
+	//while ( iter.line() )
+	//{
+	//	while ( iter.pixel() )
+	//	{
+	//		iter.v() = mContourMap.get()[index] * 255;
 
-			++index;
-		}
-	}
+	//		++index;
+	//	}
+	//}
 }
 
 void ContourDetector::testProcess()
 {
 	// Make ContourMap nice and small.
 	mContourMap.reset();
-	
-	unsigned int smallWidth, smallHeight;
-	unsigned int x, y;
-	int index;
-	smallWidth = 13;
-	smallHeight = 8;
 
-	// 12 x 12
-	mContourMap = std::unique_ptr<int>( new int[smallWidth * smallHeight] );
-	std::memset( mContourMap.get(), 0, smallWidth * smallHeight * sizeof( int ) );
+	mContourMap = std::unique_ptr<ContourMap>( new ContourMap( 13, 8 ) );
+	mContourMap->createTestCase();
 
-	createContourMapFrame( mContourMap, smallWidth, smallHeight );
-
-	// Draw a little whole contents thingy
-	//
-	// 1 1 1 1 1 1 1
-	// 1     1     1   1
-	// 1     1     1
-	// 1 1 1 1 1 1 1
-
-	// Draw start scenario!
-	x = 2;
-	y = 2;
-
-	index = ( smallWidth * y ) + x;
-	for ( unsigned int i = 0; i < 7; ++i )
-	{
-		mContourMap.get()[index + i] = 1;
-	}
-
-	x = 2;
-	y = 5;
-
-	index = ( smallWidth * y ) + x;
-	for ( unsigned int i = 0; i < 7; ++i )
-	{
-		mContourMap.get()[index + i] = 1;
-	}
-
-	// Individual 1's
-	mContourMap.get()[( smallWidth * 3 ) + 2] = 1;
-	mContourMap.get()[( smallWidth * 3 ) + 5] = 1;
-	mContourMap.get()[( smallWidth * 3 ) + 8] = 1;
-	mContourMap.get()[( smallWidth * 3 ) + 10] = 1;
-
-	mContourMap.get()[( smallWidth * 4 ) + 2] = 1;
-	mContourMap.get()[( smallWidth * 4 ) + 5] = 1;
-	mContourMap.get()[( smallWidth * 4 ) + 8] = 1;
-
-	printContourMapAscii( mContourMap, smallWidth, smallHeight );
+	mContourMap->printAsASCII();
 }
 
-void ContourDetector::printContourMapAscii( std::unique_ptr<int> &contourMap, unsigned int const & width, unsigned int const & height )
-{
-	CI_LOG_V( "--------------------------" );
-	std::stringstream ss;
-
-	for ( unsigned int y = 0; y < height; ++y )
-	{
-		for ( unsigned int x = 0; x < width; ++x )
-		{
-			int value = contourMap.get()[(width * y) + x];
-
-			if ( value >= 0 )
-			{
-				ss << " " << value;
-			}
-			else {
-				ss << value;
-			}
-		}
-		// Print line
-		CI_LOG_V( ss.str() );
-		ss.str( "" );
-	}
-}
+//void ContourDetector::printContourMapAscii( std::unique_ptr<int> &contourMap, unsigned int const & width, unsigned int const & height )
+//{
+//	CI_LOG_V( "--------------------------" );
+//	std::stringstream ss;
+//
+//	for ( unsigned int y = 0; y < height; ++y )
+//	{
+//		for ( unsigned int x = 0; x < width; ++x )
+//		{
+//			int value = contourMap.get()[(width * y) + x];
+//
+//			if ( value >= 0 )
+//			{
+//				ss << " " << value;
+//			}
+//			else {
+//				ss << value;
+//			}
+//		}
+//		// Print line
+//		CI_LOG_V( ss.str() );
+//		ss.str( "" );
+//	}
+//}
 
 ci::Surface8uRef ContourDetector::process( ci::Channel8uRef surface )
 {
