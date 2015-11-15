@@ -76,6 +76,7 @@ void CiSimplePose::detectTags( ci::Surface8uRef surface )
 
 	// Test Contour'r
 	mContourFinder->testProcess();
+	mContourFinder->process( mImgBinary );
 	return;
 	// Find Contours
 	mImgContours = mContourFinder->process( mImgBinary );

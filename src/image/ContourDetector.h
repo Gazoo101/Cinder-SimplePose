@@ -29,11 +29,6 @@ public:
 
 private:
 
-	void createContourMapFrame( std::unique_ptr<int> &contourMap, unsigned int const & width, unsigned int const & height );
-	void printContourMapAscii( std::unique_ptr<int> &contourMap, unsigned int const & width, unsigned int const & height );
-
-	void processBinaryImageIntoContourBaseMap( ci::Channel8uRef channel, std::unique_ptr<int> &contourMap );
-
 	Contour annotateContour( ci::ivec2 const &pos, Contour::TYPE borderType );
 
 	void processBordersToContours();

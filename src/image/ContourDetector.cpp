@@ -39,40 +39,6 @@ ContourDetector::~ContourDetector()
 }
 
 
-
-void ContourDetector::processBinaryImageIntoContourBaseMap( ci::Channel8uRef surface, std::unique_ptr<int> &contourMap )
-{
-	createContourMapFrame( contourMap, kmImgBorderedWidth, kmImgBorderedHeight );
-
-	// Copy channel on to center of contour map
-	auto surfaceIter = surface->getIter();
-
-	while ( surfaceIter.line() )
-	{
-		while ( surfaceIter.pixel() )
-		{
-			contourMap.get()[ (kmImgBorderedWidth * (surfaceIter.y() + 1)) + 1 + surfaceIter.x() ] = surfaceIter.v() / 255;
-		}
-	}
-
-	int test = contourMap.get()[ (kmImgBorderedWidth * kmImgBorderedHeight) - 1];
-
-
-	//// Convert into temp surface for show...
-	//auto iter = mImageDebug->getIter();
-
-	//auto index = 0;
-	//while ( iter.line() )
-	//{
-	//	while ( iter.pixel() )
-	//	{
-	//		iter.v() = mContourMap.get()[index] * 255;
-
-	//		++index;
-	//	}
-	//}
-}
-
 void ContourDetector::testProcess()
 {
 	// Make ContourMap nice and small.
@@ -114,19 +80,49 @@ ci::Surface8uRef ContourDetector::process( ci::Channel8uRef surface )
 	mContours.clear();
 
 	// Set binary-based 255 channel as new contourmap
-	mContourMap->update( surface );
+	//mContourMap->update( surface ); // cancelled for testProcess
 
 	// find them contours!
 	mContourCounter = 1;
 	mLatestBorderEncountered = 1;
 
-	auto innerContourMapIter = mContourMap->getInnerMapIter();
+	int lastPixelValue, pixelValue, nextPixelValue;
 
-	while ( innerContourMapIter.line() )
+	auto innerIter = mContourMap->getInnerMapIter();
+
+	while ( innerIter.line() )
 	{
-		while ( innerContourMapIter.pixel() )
+		mLatestBorderEncountered = 1;
+
+		lastPixelValue = 1;	// Always '1' because we start with the frame
+		//pixelValue = mContourMap.get()[posToIndex( 1, y )];
+		//nextPixelValue = mContourMap.get()[posToIndex( 2, y )];
+
+		auto apos2 = innerIter.getPos();
+
+		while ( innerIter.pixel() )
 		{
-			innerContourMapIter.v() = 2;
+
+			auto apos3 = innerIter.getPos();
+
+			if ( innerIter.v() == 1 )
+			{
+				auto apos = innerIter.getPos();
+
+				auto nbIter = mContourMap->getCCWNBIter( innerIter.getPos(), ContourMap::NeighborDirectionCCW::LEFT );
+
+				int temp = 0;
+				while ( nbIter.neighbor() )
+				{
+					// Make em 3s!
+					nbIter.v() = ++temp;
+				}
+
+				mContourMap->printAsASCII();
+			}
+
+
+			innerIter.v() = 2;
 		}
 	}
 
@@ -150,56 +146,56 @@ ci::Surface8uRef ContourDetector::process( ci::Channel8uRef surface )
 	//auto surfaceIter = mImageProcessedBordered->getIter();
 
 
-	int lastPixelValue, pixelValue, nextPixelValue;
+	
 
-	// There's no need to check the image frame, thus go from 1 to imgDim -1
-	for ( unsigned int y = 1; y < kmImgBorderedHeight - 1; ++y )
-	{
-		mLatestBorderEncountered = 1;
+	//// There's no need to check the image frame, thus go from 1 to imgDim -1
+	//for ( unsigned int y = 1; y < kmImgBorderedHeight - 1; ++y )
+	//{
+	//	mLatestBorderEncountered = 1;
 
-		lastPixelValue = mContourMap.get()[ posToIndex( 0, y ) ];
-		pixelValue = mContourMap.get()[ posToIndex( 1, y ) ];
-		nextPixelValue = mContourMap.get()[ posToIndex( 2, y ) ];
+	//	lastPixelValue = mContourMap.get()[ posToIndex( 0, y ) ];
+	//	pixelValue = mContourMap.get()[ posToIndex( 1, y ) ];
+	//	nextPixelValue = mContourMap.get()[ posToIndex( 2, y ) ];
 
-		for ( unsigned int x = 1; x < kmImgBorderedWidth - 1; ++x )
-		{
+	//	for ( unsigned int x = 1; x < kmImgBorderedWidth - 1; ++x )
+	//	{
 
-			if ( pixelValue != 0 )
-			{
-				if ( ( pixelValue == 1 ) && ( lastPixelValue == 0 ) )
-				{
-					mContours.emplace_back( annotateContour( ci::ivec2( x, y ), Contour::TYPE::OUTER ) );
-				}
-				else if ( ( pixelValue >= 1 ) && ( nextPixelValue == 0 ) )
-				{
-					if ( pixelValue > 1 )
-					{
-						mLatestBorderEncountered = pixelValue;
-					}
+	//		if ( pixelValue != 0 )
+	//		{
+	//			if ( ( pixelValue == 1 ) && ( lastPixelValue == 0 ) )
+	//			{
+	//				mContours.emplace_back( annotateContour( ci::ivec2( x, y ), Contour::TYPE::OUTER ) );
+	//			}
+	//			else if ( ( pixelValue >= 1 ) && ( nextPixelValue == 0 ) )
+	//			{
+	//				if ( pixelValue > 1 )
+	//				{
+	//					mLatestBorderEncountered = pixelValue;
+	//				}
 
-					mContours.emplace_back( annotateContour( ci::ivec2( x, y ), Contour::TYPE::HOLE ) );
-				}
-				
-				if ( pixelValue != 1 )
-				{
-					mLatestBorderEncountered = std::abs( pixelValue );
-				}
-				else {
-					// We should NEVER reach this
-					assert( 0 );
-				}
+	//				mContours.emplace_back( annotateContour( ci::ivec2( x, y ), Contour::TYPE::HOLE ) );
+	//			}
+	//			
+	//			if ( pixelValue != 1 )
+	//			{
+	//				mLatestBorderEncountered = std::abs( pixelValue );
+	//			}
+	//			else {
+	//				// We should NEVER reach this
+	//				assert( 0 );
+	//			}
 
-			}
+	//		}
 
-			// Normally, we should check that we don't go out of bounds here
-			// but we'll never execute on the last line in the image, so we'll reference
-			// existing data, and I'll bet (for now) that the if statement is potentially
-			// more costly than the look-up function.
-			lastPixelValue = pixelValue;
-			pixelValue = nextPixelValue;
-			nextPixelValue = mContourMap.get()[posToIndex( x + 2, y )];
-		}
-	}
+	//		// Normally, we should check that we don't go out of bounds here
+	//		// but we'll never execute on the last line in the image, so we'll reference
+	//		// existing data, and I'll bet (for now) that the if statement is potentially
+	//		// more costly than the look-up function.
+	//		lastPixelValue = pixelValue;
+	//		pixelValue = nextPixelValue;
+	//		nextPixelValue = mContourMap.get()[posToIndex( x + 2, y )];
+	//	}
+	//}
 
 	return mImageProcessedBordered;
 }

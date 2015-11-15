@@ -39,12 +39,34 @@ public:
 	inline unsigned int const getWidth() { return kmWidth; };
 	inline unsigned int const getHeight() { return kmHeight; };
 
+	enum class NeighborDirectionCW : unsigned char {
+		LEFT,
+		UP_LEFT,
+		UP,
+		UP_RIGHT,
+		RIGHT,
+		DOWN_RIGHT,
+		DOWN,
+		DOWN_LEFT
+	};
+
+	enum class NeighborDirectionCCW : unsigned char {
+		LEFT,
+		DOWN_LEFT,
+		DOWN,
+		DOWN_RIGHT,
+		RIGHT,
+		UP_RIGHT,
+		UP,
+		UP_LEFT
+	};
+
 private:
 
 	void createOuterFrame();
 
-	inline unsigned int const posToIndex( ci::ivec2 const &pos ) { return ( pos.y * kmImgBorderedWidth ) + pos.x; };
-	inline unsigned int const posToIndex( unsigned int const & x, unsigned int const & y ) { return ( y * kmImgBorderedWidth ) + x; };
+	inline unsigned int const posToIndex( ci::ivec2 const &pos ) { return ( pos.y * kmWidth ) + pos.x; };
+	inline unsigned int const posToIndex( unsigned int const & x, unsigned int const & y ) { return ( y * kmWidth ) + x; };
 
 	const unsigned int kmWidth, kmHeight;
 
@@ -52,10 +74,10 @@ private:
 	std::unique_ptr<int> mData;
 
 	// Left, Up-Left, Up, Up-Right, Right, Down-Right, Down, Down-Left
-	std::array<ci::ivec2, 8> const mNB8CW = std::array<ci::ivec2, 8>{ { ci::vec2( -1, 0 ), ci::vec2( -1, -1 ), ci::vec2( 0, -1 ), ci::vec2( 1, -1 ), ci::vec2( 1, 0 ), ci::vec2( 1, 1 ), ci::vec2( -1, 1 ) } };
+	std::array<ci::ivec2, 8> const mNB8CW = std::array<ci::ivec2, 8>{ { ci::vec2( -1, 0 ), ci::vec2( -1, -1 ), ci::vec2( 0, -1 ), ci::vec2( 1, -1 ), ci::vec2( 1, 0 ), ci::vec2( 1, 1 ), ci::vec2( 0, 1 ), ci::vec2( -1, 1 ) } };
 
 	// Left, Down-Left, Down, Down-Right, Right, Up-Right, Up, Up-Left
-	std::array<ci::ivec2, 8> const mNB8CCW = std::array<ci::ivec2, 8>{ { ci::vec2( -1, 0 ), ci::vec2( -1, 1 ), ci::vec2( 1, 1 ), ci::vec2( 1, 0 ), ci::vec2( 1, -1 ), ci::vec2( 0, -1 ), ci::vec2( -1, -1 ) } };
+	std::array<ci::ivec2, 8> const mNB8CCW = std::array<ci::ivec2, 8>{ { ci::vec2( -1, 0 ), ci::vec2( -1, 1 ), ci::vec2( 0, 1 ), ci::vec2( 1, 1 ), ci::vec2( 1, 0 ), ci::vec2( 1, -1 ), ci::vec2( 0, -1 ), ci::vec2( -1, -1 ) } };
 
 	/* Iterators */
 public:
@@ -68,20 +90,30 @@ public:
 			mInc( 1 ),
 			mRowInc( contourMap.getWidth() )
 		{
-			mLinePtr = contourMap.mData.get() + mRowInc;
-			mPtr = contourMap.mData.get() + mRowInc;
-			mStartX = mX = 0;
-			mStartY = mY = 0;
-
+			mLinePtr = contourMap.mData.get() + contourMap.posToIndex( 1, 1 );
+			mPtr = mLinePtr;
+			mStartX = mX = 1;
+			mStartY = mY = 1;
+			
 			mEndX = contourMap.getWidth() - 1;
 			mEndY = contourMap.getHeight() - 1;
-			// in order to be at the right place after an initial call to line(), we need to back up one line
-			mLinePtr -= mRowInc;
 
+			// in order to be at the right place after an initial call to line(), we need to back up one line
+			mY = 1 - 1;
+			mLinePtr -= mRowInc;
 		}
 
 		/*! Returns a reference to the value of the pixel that the Iter currently points to */
 		int& v() const { return mPtr[0]; }
+
+		/*! Returns a reference to the value of the pixel ahead of the one that the Iter currently points to */
+		int& nextV() const { return mPtr[1]; }
+
+		/*! Returns a reference to the value of the pixel prior to the one that the Iter currently points to */
+		int& lastV() const { return mPtr[-1]; }
+
+		//! Returns the coordinate of the pixel the Iter currently points to		
+		ci::ivec2 getPos() const { return ci::ivec2( mX, mY ); }
 
 		//! Increments which pixel of the current row the Iter points to, and returns \c false when no pixels remain in the current row.
 		bool pixel() {
@@ -94,10 +126,12 @@ public:
 		bool line() {
 			++mY;
 			mLinePtr += mRowInc;
-			mPtr = reinterpret_cast<int*>( mLinePtr );
+			mPtr = mLinePtr;
+
 			// in order to be at the right place after an initial call to pixel(), we need to back up one pixel
 			mPtr -= mInc;
 			mX = mStartX - 1;
+
 			return mY < mEndY;
 		}
 
@@ -114,14 +148,41 @@ public:
 	// Iterator for a pixels surrounding neighbors.
 	class NBIter {
 	public:
-		NBIter( ContourMap & contourMap, ci::ivec2 const & pos, std::array<ci::ivec2, 8> const & NBs ) :
+		NBIter( ContourMap & contourMap, ci::ivec2 const & pos, std::array<ci::ivec2, 8> const & NBs, unsigned char const & startingIndex ) :
+			mContourMap( contourMap ),
 			mPosCenter( pos ),
-			kmNBs( NBs )
+			kmNBs( NBs ),
+			kmNumNeighbors( NBs.size() ),
+			mNumNeighborsRemaining( NBs.size() ),
+			mIndex( startingIndex )
 		{
-			mPtr = contourMap.mData.get() + mRowInc;
-			//ContourDetector::mNB8CW[];
+			mPtr = &mContourMap.mData.get()[mContourMap.posToIndex( mPosCenter + kmNBs[startingIndex] )];
+			--mIndex;					// Back up index a single step as neighbor() will be called once upon prior to accessing values.
+			mNumNeighborsRemaining++;	// Ditto for remaining neighbors
+
+			/* mNextIndex is a bit of a misnomer, as it initially points to the first neighbor we want to inspect. However,
+			this anomoly is required if we want the iterating to otherwise be straight forward. It allows us to return true
+			in neighbor() for every single neighbor we've yet to visit */
 		};
 
+		/*! Returns a reference to the value of the pixel that the Iter currently points to */
+		int& v() const { return mPtr[0]; }
+
+		bool neighbor()
+		{
+			mIndex = ++mIndex % kmNumNeighbors;
+			--mNumNeighborsRemaining;
+			mPtr = &mContourMap.mData.get()[mContourMap.posToIndex( mPosCenter + kmNBs[mIndex] )];
+			
+			return mNumNeighborsRemaining > 0;
+		}
+
+		ContourMap			&mContourMap;
+		unsigned char		kmNumNeighbors;
+		unsigned char		mNumNeighborsRemaining;
+		char				mIndex;
+		//unsigned char		mStartingIndex;
+		//unsigned char		mStoppingIndex;
 		int					*mPtr;
 		ci::ivec2 const mPosCenter;	// The pixel/pos the surrounding neighborhoods check
 		std::array<ci::ivec2, 8> const kmNBs;
@@ -133,12 +194,12 @@ public:
 	InnerMapIter	getInnerMapIter() { return InnerMapIter( *this ); }
 
 	//! Returns an Iter which iterates the surrounding pixels of pos, in a clockwise order.
-	NBIter			getCWNBIter( ci::ivec2 const &pos ) { return NBIter( mData, pos ); }
+	NBIter			getCWNBIter( ci::ivec2 const &pos, NeighborDirectionCW startingDirection ) { return NBIter( *this, pos, mNB8CW, static_cast<unsigned char>( startingDirection ) ); }
 	//! Returns a ConstIterwhich iterates the surrounding pixels of pos, in a clockwise order.
 	//ConstIterNeighborhood	getCWNBIter( ci::ivec2 const &pos ) const { return ConstIterNeighborhood( mData, pos ); }
 
 	//! Returns an Iter which iterates the surrounding pixels of pos, in a counter-clockwise order.
-	//NBIter			getCCWNBIter( ci::ivec2 const &pos ) { return IterNeighborhood( mData, pos ); }
+	NBIter			getCCWNBIter( ci::ivec2 const &pos, NeighborDirectionCCW startingDirection ) { return NBIter( *this, pos, mNB8CCW, static_cast<unsigned char>( startingDirection ) ); }
 	//! Returns a ConstIterwhich iterates the surrounding pixels of pos, in a counter-clockwise order.
 	//ConstIterNeighborhood	getCCWNBIter( ci::ivec2 const &pos ) const { return ConstIterNeighborhood( mData, pos ); }
 
