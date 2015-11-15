@@ -113,12 +113,34 @@ ci::Surface8uRef ContourDetector::process( ci::Channel8uRef surface )
 {
 	mContours.clear();
 
-	// Fully overwrites
-	processBinaryImageIntoContourBaseMap( surface, mContourMap );
+	// Set binary-based 255 channel as new contourmap
+	mContourMap->update( surface );
 
 	// find them contours!
 	mContourCounter = 1;
 	mLatestBorderEncountered = 1;
+
+	auto innerContourMapIter = mContourMap->getInnerMapIter();
+
+	while ( innerContourMapIter.line() )
+	{
+		while ( innerContourMapIter.pixel() )
+		{
+			innerContourMapIter.v() = 2;
+		}
+	}
+
+	mContourMap->printAsASCII();
+
+
+
+
+
+
+
+
+
+
 	//mLastPixelValue = mImageProcessedBordered->getPixel( ci::ivec2(0,0) ).r;
 
 	/* At the start of the algorithm, a frame surrounds the entire image with value 1. Create an
