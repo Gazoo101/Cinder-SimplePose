@@ -61,12 +61,19 @@ public:
 		UP_LEFT
 	};
 
+	/*! Returns a reference to the value of the pixel that the Iter currently points to */
+	int& getValue( ci::ivec2 const &pos ) { return mData.get()[posToIndex( pos )]; }
+
+	void setValue( ci::ivec2 const &pos, int const & value ) { mData.get()[posToIndex( pos )] = value; }
+
 private:
 
 	void createOuterFrame();
 
 	inline unsigned int const posToIndex( ci::ivec2 const &pos ) { return ( pos.y * kmWidth ) + pos.x; };
 	inline unsigned int const posToIndex( unsigned int const & x, unsigned int const & y ) { return ( y * kmWidth ) + x; };
+
+	
 
 	const unsigned int kmWidth, kmHeight;
 

@@ -11,8 +11,7 @@
 
 #include "cinder/Surface.h"
 #include "Contour.h"	// Required due to enum
-
-class ContourMap;
+#include "ContourMap.h"	// Required due to enum
 
 class ContourDetector {
 
@@ -29,7 +28,7 @@ public:
 
 private:
 
-	Contour annotateContour( ci::ivec2 const &pos, Contour::TYPE borderType );
+	Contour annotateContour( ci::ivec2 const &pos, Contour::TYPE const & borderType, ContourMap::NeighborDirectionCW const & startingNeighbor );
 
 	void processBordersToContours();
 
