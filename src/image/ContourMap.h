@@ -83,6 +83,9 @@ private:
 	// Left, Up-Left, Up, Up-Right, Right, Down-Right, Down, Down-Left
 	std::array<ci::ivec2, 8> const mNB8CW = std::array<ci::ivec2, 8>{ { ci::vec2( -1, 0 ), ci::vec2( -1, -1 ), ci::vec2( 0, -1 ), ci::vec2( 1, -1 ), ci::vec2( 1, 0 ), ci::vec2( 1, 1 ), ci::vec2( 0, 1 ), ci::vec2( -1, 1 ) } };
 
+	// Helper array to go to the oppose CCW direction, from a CW direction!
+	std::array<unsigned char, 8> const mNBToCCWIndex = std::array<unsigned char, 8>{ { 4, 3, 2, 1, 0, 7, 6, 5 }};
+
 	// Left, Down-Left, Down, Down-Right, Right, Up-Right, Up, Up-Left
 	std::array<ci::ivec2, 8> const mNB8CCW = std::array<ci::ivec2, 8>{ { ci::vec2( -1, 0 ), ci::vec2( -1, 1 ), ci::vec2( 0, 1 ), ci::vec2( 1, 1 ), ci::vec2( 1, 0 ), ci::vec2( 1, -1 ), ci::vec2( 0, -1 ), ci::vec2( -1, -1 ) } };
 
@@ -155,25 +158,63 @@ public:
 	// Iterator for a pixels surrounding neighbors.
 	class NBIter {
 	public:
+		NBIter( const NBIter &iter ) :
+			mContourMap( iter.mContourMap ),
+			mPosCenter( iter.mPosCenter ),
+			kmNBs( iter.kmNBs ),
+			kmNumNeighbors( iter.kmNumNeighbors ),
+			mNumNeighborsRemaining( iter.mNumNeighborsRemaining ),
+			mNBVisited( std::unique_ptr<bool>( new bool[iter.kmNumNeighbors] ) ),
+			mIndex( iter.mIndex )
+		{
+			//mRedOff = iter.mRedOff;
+			//mGreenOff = iter.mGreenOff;
+			//mBlueOff = iter.mBlueOff;
+			//mAlphaOff = iter.mAlphaOff;
+			//mInc = iter.mInc;
+			//mRowInc = iter.mRowInc;
+			//mWidth = iter.mWidth;
+			//mHeight = iter.mHeight;
+			//mLinePtr = iter.mLinePtr;
+			//mPtr = iter.mPtr;
+			//mStartX = iter.mStartX;
+			//mX = iter.mX;
+			//mStartY = iter.mStartY;
+			//mY = iter.mY;
+			//mEndX = iter.mEndX;
+			//mEndY = iter.mEndY;
+		}
+
+		// hand-craft copy constructor... sigh...
+
+
 		NBIter( ContourMap & contourMap, ci::ivec2 const & pos, std::array<ci::ivec2, 8> const & NBs, unsigned char const & startingIndex ) :
 			mContourMap( contourMap ),
 			mPosCenter( pos ),
 			kmNBs( NBs ),
 			kmNumNeighbors( NBs.size() ),
 			mNumNeighborsRemaining( NBs.size() ),
+			mNBVisited( std::unique_ptr<bool>( new bool[NBs.size()] ) ),
 			mIndex( startingIndex )
 		{
+			std::memset( mNBVisited.get(), false, kmNumNeighbors );
+
 			mPtr = &mContourMap.mData.get()[mContourMap.posToIndex( mPosCenter + kmNBs[startingIndex] )];
 			--mIndex;					// Back up index a single step as neighbor() will be called once upon prior to accessing values.
 			mNumNeighborsRemaining++;	// Ditto for remaining neighbors
 
-			/* mNextIndex is a bit of a misnomer, as it initially points to the first neighbor we want to inspect. However,
-			this anomoly is required if we want the iterating to otherwise be straight forward. It allows us to return true
-			in neighbor() for every single neighbor we've yet to visit */
 		};
 
 		/*! Returns a reference to the value of the pixel that the Iter currently points to */
-		int& v() const { return mPtr[0]; }
+		int& v() const {
+			mNBVisited.get()[mIndex] = true;
+			return mPtr[0];
+		}
+
+		char const & index() const { return mIndex; }
+
+		//! Returns the coordinate of the pixel the Iter currently points to		
+		ci::ivec2 getPos() const { return mPosCenter + kmNBs[mIndex]; }
 
 		bool neighbor()
 		{
@@ -188,11 +229,12 @@ public:
 		unsigned char		kmNumNeighbors;
 		unsigned char		mNumNeighborsRemaining;
 		char				mIndex;
-		//unsigned char		mStartingIndex;
-		//unsigned char		mStoppingIndex;
 		int					*mPtr;
 		ci::ivec2 const mPosCenter;	// The pixel/pos the surrounding neighborhoods check
 		std::array<ci::ivec2, 8> const kmNBs;
+		std::unique_ptr<bool> mNBVisited;
+
+		//std::array<bool, 8> mNBVisited = { { false, false, false, false, false, false, false, false } };
 	};
 
 

@@ -44,6 +44,22 @@ void ContourDetector::testProcess()
 
 	mContourMap->printAsASCII();
 
+
+	// Test vector iterators!
+
+	std::vector<int> bluh;
+
+	std::vector<int>::iterator monk;
+
+	monk = bluh.begin();
+
+
+	ci::Surface8u hep;
+
+	auto hop = hep.getIter();
+
+	hop = hep.getIter();
+
 	// Random UnitTests!
 	//auto innerIter = mContourMap->getInnerMapIter();
 
@@ -148,13 +164,39 @@ Contour ContourDetector::annotateContour( ci::ivec2 const &pos, Contour::TYPE co
 	// We've discovered a new contour!
 	++mContourCounter;
 
-	auto nbIter = mContourMap->getCWNBIter( ci::ivec2( 0, 0 ), startingNeighbor );
+	// Clock-wise Neighborhood Iterator
+	auto cwNBIter = mContourMap->getCWNBIter( pos, startingNeighbor );
 
-	while ( nbIter.neighbor() )
+	while ( cwNBIter.neighbor() )
 	{
-		if ( nbIter.v() != 0 )
+		if ( cwNBIter.v() != 0 )
 		{
 			// Do some stuff
+			ci::ivec2 centerPos = pos;
+			ci::ivec2 nbPos = cwNBIter.getPos();
+
+			// Counter clockwise Neighborhood Iterator
+			auto ccwNBIter = mContourMap->getCCWNBIter( centerPos, ContourMap::NeighborDirectionCCW::UP ); // <-- FIX DIRECTION!
+
+			while ( ccwNBIter.neighbor() )
+			{
+				// Set some values
+
+				bool backAtBeginning;
+
+				if ( backAtBeginning )
+				{
+					// End
+				}
+				else {
+					// Update centerPos and nbPos
+					ccwNBIter = std::move( mContourMap->getCCWNBIter( centerPos, ContourMap::NeighborDirectionCCW::UP ) );
+				}
+
+			}
+
+			Contour contour(0,0);
+			return std::move( contour );
 		}
 	}
 
