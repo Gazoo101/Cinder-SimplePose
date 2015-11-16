@@ -33,6 +33,8 @@ public:
 	void update( ci::Channel8uRef binaryImg );
 
 	void createTestCase();
+	void createTestCase2();
+	void createTestCase3();
 
 	void printAsASCII();
 
@@ -40,30 +42,18 @@ public:
 	inline unsigned int const getHeight() { return kmHeight; };
 
 	enum class NeighborDirectionCW : unsigned char {
-		LEFT = 0,
-		UP_LEFT,
-		UP,
-		UP_RIGHT,
-		RIGHT,
-		DOWN_RIGHT,
-		DOWN,
-		DOWN_LEFT
+		LEFT = 0, UP_LEFT, UP, UP_RIGHT, RIGHT,	DOWN_RIGHT,	DOWN, DOWN_LEFT
 	};
 
 	enum class NeighborDirectionCCW : unsigned char {
-		LEFT = 0,
-		DOWN_LEFT,
-		DOWN,
-		DOWN_RIGHT,
-		RIGHT,
-		UP_RIGHT,
-		UP,
-		UP_LEFT
+		LEFT = 0, DOWN_LEFT, DOWN, DOWN_RIGHT, RIGHT, UP_RIGHT, UP,	UP_LEFT
 	};
+
+	char const * getCWDirString( NeighborDirectionCW const & cwDir ) { return mNB8CWStr[ static_cast<unsigned char>( cwDir ) ]; }
+	char const * getCCWDirString( NeighborDirectionCCW const & ccwDir ) { return mNB8CCWStr[static_cast<unsigned char>( ccwDir )]; }
 
 	/*! Returns a reference to the value of the pixel that the Iter currently points to */
 	int& getValue( ci::ivec2 const &pos ) { return mData.get()[posToIndex( pos )]; }
-
 	void setValue( ci::ivec2 const &pos, int const & value ) { mData.get()[posToIndex( pos )] = value; }
 
 	NeighborDirectionCCW getCCWfromCW( NeighborDirectionCW const & cwDir ) { return NeighborDirectionCCW( mNBCWToCCWIndex[static_cast<unsigned char>( cwDir )] ); };
@@ -88,6 +78,7 @@ private:
 
 	// Left, Up-Left, Up, Up-Right, Right, Down-Right, Down, Down-Left
 	std::array<ci::ivec2, 8> const mNB8CW = std::array<ci::ivec2, 8>{ { ci::vec2( -1, 0 ), ci::vec2( -1, -1 ), ci::vec2( 0, -1 ), ci::vec2( 1, -1 ), ci::vec2( 1, 0 ), ci::vec2( 1, 1 ), ci::vec2( 0, 1 ), ci::vec2( -1, 1 ) } };
+	std::array<const char *, 8> const mNB8CWStr = std::array<const char *, 8>{{"Left", "Up Left", "Up", "Up Right", "Right", "Down Right", "Down", "Down Left"}};
 
 	// Helper array to go to the CCW direction, from a CW direction!
 	std::array<unsigned char, 8> const mNBCWToCCWIndex = std::array<unsigned char, 8>{ { 0, 7, 6, 5, 4, 3, 2, 1 }};
@@ -95,6 +86,7 @@ private:
 
 	// Left, Down-Left, Down, Down-Right, Right, Up-Right, Up, Up-Left
 	std::array<ci::ivec2, 8> const mNB8CCW = std::array<ci::ivec2, 8>{ { ci::vec2( -1, 0 ), ci::vec2( -1, 1 ), ci::vec2( 0, 1 ), ci::vec2( 1, 1 ), ci::vec2( 1, 0 ), ci::vec2( 1, -1 ), ci::vec2( 0, -1 ), ci::vec2( -1, -1 ) } };
+	std::array<const char *, 8> const mNB8CCWStr = std::array<const char *, 8>{{"Left", "Down Left", "Down", "Down Right", "Right", "Up Right", "Up", "Up Left"}};
 
 	/* Iterators */
 public:
@@ -191,8 +183,9 @@ public:
 				kmNumNeighbors = rhs.kmNumNeighbors;
 				mNumNeighborsRemaining = rhs.mNumNeighborsRemaining;
 				mIndex = rhs.mIndex;
-				*mPtr = *( rhs.mPtr );
+				mPtr = rhs.mPtr;
 				mNBVisited = std::unique_ptr<bool>( new bool[kmNumNeighbors] );
+				std::memset( mNBVisited.get(), false, kmNumNeighbors );
 
 				mPosCenter = rhs.mPosCenter;
 				kmNBs = rhs.kmNBs;

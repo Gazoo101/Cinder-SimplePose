@@ -28,7 +28,7 @@ public:
 
 private:
 
-	Contour annotateContour( ci::ivec2 const &pos, Contour::TYPE const & borderType, ContourMap::NeighborDirectionCW const & startingNeighbor );
+	Contour annotateContour( ci::ivec2 const &pos, Contour::TYPE const & borderType, ContourMap::NeighborDirectionCW const & startingDirCW );
 
 	void processBordersToContours();
 

@@ -94,6 +94,41 @@ void ContourMap::createTestCase()
 	mData.get()[( kmWidth * 4 ) + 8] = 1;
 }
 
+void ContourMap::createTestCase2()
+{
+	// 1 1   1
+	//
+	// 1 1
+	// 1 1   1
+	//
+
+	// Individual 1's
+	mData.get()[( kmWidth * 2 ) + 2] = 1;
+	mData.get()[( kmWidth * 2 ) + 3] = 1;
+	mData.get()[( kmWidth * 2 ) + 5] = 1;
+
+	mData.get()[( kmWidth * 4 ) + 2] = 1;
+	mData.get()[( kmWidth * 4 ) + 3] = 1;
+
+	mData.get()[( kmWidth * 5 ) + 2] = 1;
+	mData.get()[( kmWidth * 5 ) + 3] = 1;
+	mData.get()[( kmWidth * 5 ) + 5] = 1;
+}
+
+void ContourMap::createTestCase3()
+{
+	// 1 1
+	// 1 1   1
+
+	// Individual 1's
+	mData.get()[( kmWidth * 2 ) + 2] = 1;
+	mData.get()[( kmWidth * 2 ) + 3] = 1;
+
+	mData.get()[( kmWidth * 3 ) + 2] = 1;
+	mData.get()[( kmWidth * 3 ) + 3] = 1;
+	mData.get()[( kmWidth * 3 ) + 5] = 1;
+}
+
 void ContourMap::printAsASCII()
 {
 	CI_LOG_V( "--------------------------" );
