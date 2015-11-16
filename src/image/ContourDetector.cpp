@@ -163,50 +163,80 @@ Contour ContourDetector::annotateContour( ci::ivec2 const &pos, Contour::TYPE co
 {
 	// We've discovered a new contour!
 	++mContourCounter;
+	Contour contour( mContourCounter, 0 );
+	contour.addPoint( pos );
 
 	// Clock-wise Neighborhood Iterator
 	auto cwNBIter = mContourMap->getCWNBIter( pos, startingNeighbor );
 
+	// Visit neighboring pixels in a clock-wise order
 	while ( cwNBIter.neighbor() )
 	{
 		if ( cwNBIter.v() != 0 )
 		{
-			// Do some stuff
-			ci::ivec2 centerPos = pos;
-			ci::ivec2 nbPos = cwNBIter.getPos();
+			// Remember starting point
+			ci::ivec2 const startingPos = pos;
+			ci::ivec2 const startingPosFirstNonZeroNB = cwNBIter.getPos();
+
+			ci::ivec2 centerPos = cwNBIter.getPos();
 
 			// Counter clockwise Neighborhood Iterator
-			auto ccwNBIter = mContourMap->getCCWNBIter( centerPos, ContourMap::NeighborDirectionCCW::UP ); // <-- FIX DIRECTION!
+			//contour.addPoint( centerPos );
+			auto ccwNBIter = mContourMap->getCCWNBIter( centerPos, mContourMap->getCCWMinusOnefromCWIndex( cwNBIter.index() ) );
 
 			while ( ccwNBIter.neighbor() )
 			{
-				// Set some values
-
-				bool backAtBeginning;
-
-				if ( backAtBeginning )
+				if ( ccwNBIter.v() != 0 )
 				{
-					// End
-				}
-				else {
+
+					// If right neighbor examined...
+					if ( ccwNBIter.visited( static_cast<unsigned char>( ContourMap::NeighborDirectionCCW::RIGHT ) ) )
+					{
+						if ( mContourMap->getValue( centerPos + ci::ivec2( 1, 0 ) ) == 0 )
+						{
+							// ... and value == 0
+							mContourMap->setValue( pos, -( mContourCounter ) );
+						}
+						else {
+							// ... and value != 0
+							if ( mContourMap->getValue(centerPos) == 1 )
+							{
+								mContourMap->setValue( pos, -( mContourCounter ) );
+							}
+						}
+					}
+
+					bool backAtBeginning = ( startingPos == ccwNBIter.getPos() ) && ( startingPosFirstNonZeroNB == centerPos );
+
+					if ( backAtBeginning )
+					{
+						// End
+						int horse = 2;
+						break;
+					}
+					
+					// If we're not back at the beginning, swap places and restart the search!
+					centerPos = ccwNBIter.getPos();
+					auto direction = ContourMap::NeighborDirectionCCW(( ccwNBIter.index() + 4 ) % 8);
+
 					// Update centerPos and nbPos
-					ccwNBIter = std::move( mContourMap->getCCWNBIter( centerPos, ContourMap::NeighborDirectionCCW::UP ) );
+					//contour.addPoint( centerPos );
+					ccwNBIter = mContourMap->getCCWNBIter( centerPos, direction );
 				}
+				// We should never be able to reach this place. Our initial clockwise scan of a pixel revealed at
+				// least ONE non zero neighbor, so we should encounter it no matter what.
+				assert( 0 );
 
 			}
 
-			Contour contour(0,0);
 			return std::move( contour );
 		}
 	}
 
 	// We did not find a non-0 pixel
-	mContourMap->setValue( pos, -mContourCounter );
+	mContourMap->setValue( pos, -(mContourCounter) );
 
-
-
-	Contour contour( 0, 0 );
-
+	mContourMap->printAsASCII();
 	return std::move( contour );
 }
 

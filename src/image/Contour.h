@@ -40,8 +40,12 @@ struct Contour {
 		HOLE
 	};
 
+	void addPoint( ci::ivec2 const & pos ) { mCoords.push_back( pos ); };
+
 	int const mId;
 	int const mParentContourId;
+
+	std::vector<ci::ivec2> mCoords;
 
 	std::list<int> mCoordsComplex;
 	std::vector<int> mCoordsSimple;
