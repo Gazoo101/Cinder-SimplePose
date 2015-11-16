@@ -12,6 +12,7 @@
 #include <list>
 #include "cinder/Color.h"
 #include "cinder/Rand.h"
+#include "cinder/PolyLine.h"
 
 struct Contour {
 
@@ -31,26 +32,31 @@ struct Contour {
 		mColor = ci::Color( ci::CM_HSV, ci::vec3( ci::Rand::randFloat(), 1, 1 ) );
 	};
 
-	~Contour()
-	{
-	};
-
 	enum TYPE {
 		OUTER,
 		HOLE
 	};
 
-	void addPoint( ci::ivec2 const & pos ) { mCoords.push_back( pos ); };
+	void addPoint( ci::ivec2 const & pos )
+	{
+		mPolyLine.push_back( pos );
+		//mCoords.push_back( pos );
+	};
+
+	void draw();
 
 	int const mId;
 	int const mParentContourId;
 
-	std::vector<ci::ivec2> mCoords;
+	
+	//std::vector<ci::ivec2> mCoords;
 
 	std::list<int> mCoordsComplex;
 	std::vector<int> mCoordsSimple;
 
+	// For rendering purposes
 	ci::Color mColor;
+	ci::PolyLine2 mPolyLine;
 
 };
 

@@ -58,9 +58,9 @@ public:
 
 	NeighborDirectionCCW getCCWfromCW( NeighborDirectionCW const & cwDir ) { return NeighborDirectionCCW( mNBCWToCCWIndex[static_cast<unsigned char>( cwDir )] ); };
 
-	NeighborDirectionCCW getCCWMinusOnefromCW( NeighborDirectionCW const & cwDir ) { return NeighborDirectionCCW( mNBCWToCCWIndex[( (static_cast<unsigned char>( cwDir ) - 1) % 8 )] ); };
+	NeighborDirectionCCW getCCWMinusOnefromCW( NeighborDirectionCW const & cwDir ) { return NeighborDirectionCCW( mNBCWToCCWIndex[( (static_cast<unsigned char>( cwDir ) + 7) % 8 )] ); };
 
-	NeighborDirectionCCW getCCWMinusOnefromCWIndex( char const & cwDirIndex ) { return NeighborDirectionCCW( mNBCWToCCWIndex[( ( cwDirIndex - 1 ) % 8 )] ); };
+	NeighborDirectionCCW getCCWMinusOnefromCWIndex( char const & cwDirIndex ) { return NeighborDirectionCCW( mNBCWToCCWIndex[( ( cwDirIndex + 7 ) % 8 )] ); };
 
 private:
 

@@ -24,13 +24,15 @@ public:
 
 	ci::Channel8uRef getDebugImg() { return mImageDebug; };
 
+	void drawAllContours();
+
 	void testProcess();
 
 private:
 
 	Contour annotateContour( ci::ivec2 const &pos, Contour::TYPE const & borderType, ContourMap::NeighborDirectionCW const & startingDirCW );
 
-	void processBordersToContours();
+	void processContoursToCandidateSquares();
 
 	inline unsigned int const posToIndex( ci::ivec2 const &pos ) { return ( pos.y * kmImgBorderedWidth ) + pos.x; };
 	inline unsigned int const posToIndex( unsigned int const & x, unsigned int const & y ) { return ( y * kmImgBorderedWidth ) + x; };

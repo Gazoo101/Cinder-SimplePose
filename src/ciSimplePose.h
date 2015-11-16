@@ -37,6 +37,8 @@ public:
 	ci::gl::Texture2dRef getTextureTags() { return mTexTags; };
 	ci::gl::Texture2dRef getTextureDebug() { return mTexDebug; };
 
+	void drawAllContours();
+
 private:
 
 	ci::Channel8uRef processIncomingToGrayscale( ci::Surface8uRef surface );

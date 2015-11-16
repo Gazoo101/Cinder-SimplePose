@@ -75,7 +75,7 @@ void CiSimplePose::detectTags( ci::Surface8uRef surface )
 	mTexBinary->update( *mImgBinary );
 
 	// Test Contour'r
-	mContourFinder->testProcess();
+	//mContourFinder->testProcess();
 	mContourFinder->process( mImgBinary );
 	return;
 	// Find Contours
@@ -121,6 +121,11 @@ void CiSimplePose::detectTags( ci::Surface8uRef surface )
 	// Do serious math to determine its position in relation to camera
 
 	// Put the location or something in vector ready to return
+}
+
+void CiSimplePose::drawAllContours()
+{
+	mContourFinder->drawAllContours();
 }
 
 ci::Channel8uRef CiSimplePose::processIncomingToGrayscale( ci::Surface8uRef surface )
