@@ -54,6 +54,8 @@ CiSimplePose::CiSimplePose( unsigned int const & incomingImagesWidth, unsigned i
 			chanIter.v() = ci::randInt( 0, 255 );
 		}
 	}
+
+	mContourFinder->testSimplification();
 }
 
 CiSimplePose::~CiSimplePose()
@@ -66,49 +68,25 @@ ci::Surface8uRef CiSimplePose::getTagTex( unsigned int const &numTags ) { return
 
 void CiSimplePose::detectTags( ci::Surface8uRef surface )
 {
-	// Convert to grayscale
-	auto imgGrayScale = ci::Channel8u::create( *surface );
-	mTexGrayscale->update( *imgGrayScale );
+	//mContourFinder->testSimplification();
 
-	// Apply adaptive thresholding
-	mImgBinary = mBinarizer->process( imgGrayScale );
-	mTexBinary->update( *mImgBinary );
+	//// Convert to grayscale
+	//auto imgGrayScale = ci::Channel8u::create( *surface );
+	//mTexGrayscale->update( *imgGrayScale );
 
-	// Test Contour'r
-	//mContourFinder->testProcess();
-	mContourFinder->process( mImgBinary );
-	return;
-	// Find Contours
-	mImgContours = mContourFinder->process( mImgBinary );
+	//// Apply adaptive thresholding
+	//mImgBinary = mBinarizer->process( imgGrayScale );
+	//mTexBinary->update( *mImgBinary );
 
-	// Temp Debugging
-	mTexDebug->update( *mContourFinder->getDebugImg() );
-
-	//mImgBinary = mContourFinder->getDebugImg();
-
-	//auto chanIter = mImgBinary->getIter();
-
-	//while ( chanIter.line() )
-	//{
-	//	while ( chanIter.pixel() )
-	//	{
-	//		CI_LOG_V("insanity pixel value " << chanIter.v() );
-	//	}
-	//}
-	
-
-	
-
-	// Debugs
-	//mImgBinary = mContourFinder->getDebugImg();
-	
-
-	mTexContours->update( *mImgContours );
-	
-	
-	
-	
+	//// Detect Contours
 	//mContourFinder->process( mImgBinary );
+	//mContourFinder->processContoursToCandidateSquares();
+
+
+
+
+
+	// Todo:
 
 	// Detect squares
 	//detectSquaresInBinary( mIncomingBinarized );
@@ -125,7 +103,9 @@ void CiSimplePose::detectTags( ci::Surface8uRef surface )
 
 void CiSimplePose::drawAllContours()
 {
-	mContourFinder->drawAllContours();
+	//mContourFinder->drawAllContours();
+
+	mContourFinder->drawTestPolys();
 }
 
 ci::Channel8uRef CiSimplePose::processIncomingToGrayscale( ci::Surface8uRef surface )

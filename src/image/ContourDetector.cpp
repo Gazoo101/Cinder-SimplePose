@@ -6,7 +6,7 @@
 * All other rights reserved.
 */
 
-#define CI_MIN_LOG_LEVEL 3
+#define CI_MIN_LOG_LEVEL 0
 
 #include "ContourDetector.h"
 #include "ContourMap.h"
@@ -15,6 +15,9 @@
 #include "cinder/Log.h"
 
 #include "psimpl_v7_src/psimpl.h"
+
+#include "cinder/gl/draw.h"	// temp
+#include "cinder/gl/wrapper.h"
 
 ContourDetector::ContourDetector(unsigned int const & incomingImagesWidth, unsigned int const & incomingImagesHeight) :
 	kmIncomingImgsWidth( incomingImagesWidth ),
@@ -47,61 +50,9 @@ void ContourDetector::testProcess()
 
 	//mContourMap->printAsASCII();
 
-
-	// Test vector iterators!
-
-	std::vector<int> bluh;
-
-	std::vector<int>::iterator monk;
-
-	monk = bluh.begin();
-
-
-	ci::Surface8u hep;
-
-	auto hop = hep.getIter();
-
-	hop = hep.getIter();
-
-	// Random UnitTests!
-	//auto innerIter = mContourMap->getInnerMapIter();
-
-	//while ( innerIter.line() )
-	//{
-	//	mLatestBorderEncountered = 1;
-
-	//	auto apos2 = innerIter.getPos();
-
-	//	while ( innerIter.pixel() )
-	//	{
-
-	//		auto apos3 = innerIter.getPos();
-
-	//		if ( innerIter.v() == 1 )
-	//		{
-	//			auto apos = innerIter.getPos();
-
-	//			auto nbIter = mContourMap->getCCWNBIter( innerIter.getPos(), ContourMap::NeighborDirectionCCW::LEFT );
-
-	//			int temp = 0;
-	//			while ( nbIter.neighbor() )
-	//			{
-	//				// Make em 3s!
-	//				nbIter.v() = ++temp;
-	//			}
-
-	//			mContourMap->printAsASCII();
-	//		}
-
-
-	//		innerIter.v() = 2;
-	//	}
-	//}
-
-	//mContourMap->printAsASCII();
 }
 
-ci::Surface8uRef ContourDetector::process( ci::Channel8uRef surface )
+void ContourDetector::process( ci::Channel8uRef surface )
 {
 	CI_LOG_V("Contour detection: [start]");
 	mContours.clear();
@@ -134,7 +85,7 @@ ci::Surface8uRef ContourDetector::process( ci::Channel8uRef surface )
 				{
 					CI_LOG_V( "Contour Detected - Pos: " << innerIter.getPos() <<" Type: Outer" );
 					mContours.emplace_back( annotateContour( innerIter.getPos(), Contour::TYPE::OUTER, ContourMap::NeighborDirectionCW::LEFT ) );
-					CI_LOG_D( "[Contour added ID = " << mContourCounter << ", outer, containing " << mContours.back().mCoords.size() << " pixels]" );
+					//CI_LOG_D( "[Contour added ID = " << mContourCounter << ", outer, containing " << mContours.back().mCoords.size() << " pixels]" );
 				}
 				else if ( ( pixelValue >= 1 ) && ( nextPixelValue == 0 ) )
 				{
@@ -145,7 +96,7 @@ ci::Surface8uRef ContourDetector::process( ci::Channel8uRef surface )
 
 					CI_LOG_V( "Contour Detected - Pos: " << innerIter.getPos() << " Type: Hole" );
 					mContours.emplace_back( annotateContour( innerIter.getPos(), Contour::TYPE::HOLE, ContourMap::NeighborDirectionCW::RIGHT ) );
-					CI_LOG_D( "[Contour added ID = " << mContourCounter << ", hole, containing " << mContours.back().mCoords.size() << " pixels]" );
+					//CI_LOG_D( "[Contour added ID = " << mContourCounter << ", hole, containing " << mContours.back().mCoords.size() << " pixels]" );
 				}
 			
 				// We used the iter here, as annotateContour may have changed the pixel value
@@ -162,7 +113,7 @@ ci::Surface8uRef ContourDetector::process( ci::Channel8uRef surface )
 	//mContourMap->printAsASCII();
 
 	CI_LOG_V( "Contour detection: [end]" );
-	return mImageProcessedBordered;
+	//return mImageProcessedBordered;
 }
 
 Contour ContourDetector::annotateContour( ci::ivec2 const &pos, Contour::TYPE const & borderType, ContourMap::NeighborDirectionCW const & startingDirCW )
@@ -261,6 +212,55 @@ void ContourDetector::drawAllContours()
 	}
 }
 
+void ContourDetector::drawTestPolys()
+{
+	ci::gl::color( ci::Color("green"));
+	ci::gl::draw( mTestPoly1 );
+
+	ci::gl::color( ci::Color( "red" ) );
+	ci::gl::draw( mTestPoly1Reduced );
+
+}
+
+void ContourDetector::testSimplification()
+{
+	mTestPoly1.push_back( ci::vec2( 20, 20 ) );
+	mTestPoly1.push_back( ci::vec2( 30, 40 ) );
+	mTestPoly1.push_back( ci::vec2( 70, 140 ) );
+	mTestPoly1.push_back( ci::vec2( 10, 99 ) );
+
+	for ( float x = 30; x < 500; ++x )
+	{
+		mTestPoly1.push_back( ci::vec2( x, 200 + 200 * sin( x / 100 ) ) );
+		CI_LOG_V( "pos " << ci::vec2( x, 200 + 200 * sin( x / 100 ) ) );
+	}
+
+	std::list<float> aList;
+
+	for ( auto const & temp : mTestPoly1 )
+	{
+		aList.push_back( temp.x );
+		aList.push_back( temp.y );
+		CI_LOG_V( "this a coord?" << temp );
+	}
+
+	auto begin = aList.begin();
+	auto end = aList.end();
+
+	std::vector<float> aVec;
+
+	psimpl::simplify_douglas_peucker<2>( begin, end, 3, std::back_inserter( aVec ) );
+
+	for ( int vecIndex = 0; vecIndex < aVec.size(); )
+	{
+		mTestPoly1Reduced.push_back( ci::vec2( aVec[vecIndex], aVec[vecIndex + 1] ) );
+
+		vecIndex += 2;
+	}
+	
+	
+}
+
 void ContourDetector::processContoursToCandidateSquares()
 {
 	for ( auto & contour : mContours )
@@ -271,8 +271,6 @@ void ContourDetector::processContoursToCandidateSquares()
 		// In original implementation, Epsilon was:
 		// cvContourPerimeter(mInnerContours)*0.02
 		// Essentially the length of the contour * 0.02
-
-		std::vector<int> temp;
 
 		// 2 dimentions
 		psimpl::simplify_douglas_peucker<2>( begin, end, 3, std::back_inserter( contour.mCoordsSimple ) );

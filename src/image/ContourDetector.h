@@ -13,6 +13,8 @@
 #include "Contour.h"	// Required due to enum
 #include "ContourMap.h"	// Required due to enum
 
+#include "cinder/PolyLine.h"
+
 class ContourDetector {
 
 public:
@@ -20,19 +22,21 @@ public:
 	ContourDetector( unsigned int const & incomingImagesWidth, unsigned int const & incomingImagesHeight );
 	~ContourDetector();
 
-	ci::Surface8uRef process( ci::Channel8uRef surface );
+	void process( ci::Channel8uRef surface );
+	void processContoursToCandidateSquares();
+
 
 	ci::Channel8uRef getDebugImg() { return mImageDebug; };
 
 	void drawAllContours();
+	void drawTestPolys();
 
 	void testProcess();
+	void testSimplification();
 
 private:
 
 	Contour annotateContour( ci::ivec2 const &pos, Contour::TYPE const & borderType, ContourMap::NeighborDirectionCW const & startingDirCW );
-
-	void processContoursToCandidateSquares();
 
 	inline unsigned int const posToIndex( ci::ivec2 const &pos ) { return ( pos.y * kmImgBorderedWidth ) + pos.x; };
 	inline unsigned int const posToIndex( unsigned int const & x, unsigned int const & y ) { return ( y * kmImgBorderedWidth ) + x; };
@@ -49,11 +53,11 @@ private:
 	std::unique_ptr<ContourMap> mContourMap;
 	std::vector<Contour> mContours;
 
-	//std::vector<ci::ivec2> mNB8CW, mNB8CCW, mNB4CW, mNB4CCW;
+	ci::PolyLine2f mTestPoly1, mTestPoly1Reduced;
+	ci::PolyLine2f mTestPoly2, mTestPoly2Reduced;
 
 	unsigned int const kmIncomingImgsWidth, kmIncomingImgsHeight;
 	unsigned int const kmImgBorderedWidth, kmImgBorderedHeight;
-
 };
 
 #endif /* CONTOURDETECTOR */
