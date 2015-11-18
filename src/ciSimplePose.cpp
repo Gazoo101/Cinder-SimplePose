@@ -69,9 +69,9 @@ void CiSimplePose::detectTags( ci::Surface8uRef surface )
 
 	// Detect Contours
 	mContourFinder->process( mImgBinary );
-	//mContourFinder->processContoursToCandidateSquares();
 
-
+	// Approximate Polygons from Contours and filter polygons to retain only possible tags
+	mPolygonApproximator->process( mContourFinder->getContours() );
 
 
 
@@ -92,9 +92,14 @@ void CiSimplePose::detectTags( ci::Surface8uRef surface )
 
 void CiSimplePose::drawAllContours()
 {
-	//mContourFinder->drawAllContours();
+	mContourFinder->drawAllContours();
 
-	mPolygonApproximator->drawTestPolys();
+	//mPolygonApproximator->drawTestPolys();
+}
+
+void CiSimplePose::drawAllPolygonSquares()
+{
+	mPolygonApproximator->drawAllPolygons();
 }
 
 ci::Channel8uRef CiSimplePose::processIncomingToGrayscale( ci::Surface8uRef surface )

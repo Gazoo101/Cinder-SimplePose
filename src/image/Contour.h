@@ -47,7 +47,7 @@ struct Contour {
 
 
 
-	void draw();
+	void draw() const;
 
 	int const mId;
 	int const mParentContourId;

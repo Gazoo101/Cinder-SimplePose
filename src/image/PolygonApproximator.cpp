@@ -8,6 +8,7 @@
 
 #include "PolygonApproximator.h"
 #include "Contour.h"
+#include "Polygon.h"
 
 #include "psimpl_v7_src/psimpl.h"
 
@@ -29,11 +30,27 @@ PolygonApproximator::~PolygonApproximator()
 
 void PolygonApproximator::process( std::vector<Contour> const & contours )
 {
+	mPolygons.clear();
+
+	auto polygons = approximatePolygonsFromContours( contours );
+	mPolygons = filterPolygons( polygons );
+}
+
+std::vector<Polygon> PolygonApproximator::approximatePolygonsFromContours( std::vector<Contour> const & contours )
+{
 	std::vector<int> contourCoords;
 	std::vector<int> approximatedPolygonCoords;
 
+	contourCoords.reserve(100);
+	approximatedPolygonCoords.reserve(40);
+
+	std::vector<Polygon> approximatedPolygons;
+
 	for ( auto & contour : contours )
 	{
+		contourCoords.clear();
+		approximatedPolygonCoords.clear();
+
 		for ( auto & pos : contour.mCoords )
 		{
 			contourCoords.push_back( pos.x );
@@ -46,9 +63,19 @@ void PolygonApproximator::process( std::vector<Contour> const & contours )
 		// In original implementation, Epsilon was:
 		// cvContourPerimeter(mInnerContours)*0.02
 		// Essentially the length of the contour * 0.02
+		psimpl::simplify_douglas_peucker<2>( begin, end, 2, std::back_inserter( approximatedPolygonCoords ) );
 
-		psimpl::simplify_douglas_peucker<2>( begin, end, 3, std::back_inserter( approximatedPolygonCoords ) );
+		approximatedPolygons.emplace_back( Polygon( approximatedPolygonCoords ));
 	}
+
+	return std::move( approximatedPolygons );
+}
+
+std::vector<Polygon> PolygonApproximator::filterPolygons( std::vector<Polygon> const & polygons )
+{
+	std::vector<Polygon> tagLikePolygons;
+
+	return std::move( tagLikePolygons );
 }
 
 void PolygonApproximator::testSimplification()
@@ -129,6 +156,14 @@ void PolygonApproximator::testSimplification()
 		vecIndex += 2;
 	}
 
+}
+
+void PolygonApproximator::drawAllPolygons() const
+{
+	for ( auto const & polygon : mPolygons )
+	{
+		polygon.draw();
+	}
 }
 
 void PolygonApproximator::drawTestPolys()

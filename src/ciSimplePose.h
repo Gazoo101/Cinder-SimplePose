@@ -41,6 +41,7 @@ public:
 	ci::gl::Texture2dRef getTextureDebug() { return mTexDebug; };
 
 	void drawAllContours();
+	void drawAllPolygonSquares();
 
 	void unitTest();
 

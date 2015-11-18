@@ -10,7 +10,7 @@
 #include "cinder/gl/draw.h"
 #include "cinder/gl/wrapper.h"
 
-void Contour::draw()
+void Contour::draw() const
 {
 	ci::gl::color( mColor );
 	ci::gl::draw( mPolyLine );

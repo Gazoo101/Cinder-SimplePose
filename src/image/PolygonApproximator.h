@@ -11,7 +11,10 @@
 
 #include <vector>
 #include "cinder/PolyLine.h"
+
+// Forward Declarations
 struct Contour;
+struct Polygon;
 
 class PolygonApproximator {
 
@@ -24,9 +27,16 @@ public:
 
 	void testSimplification();
 
+	void drawAllPolygons() const;
+
 	void drawTestPolys();
 
 private:
+
+	std::vector<Polygon> approximatePolygonsFromContours( std::vector<Contour> const & contours );
+	std::vector<Polygon> filterPolygons( std::vector<Polygon> const & polygons );
+
+	std::vector<Polygon> mPolygons;
 
 	ci::PolyLine2f mTestPoly1, mTestPoly1Reduced;
 	ci::PolyLine2f mTestPoly2, mTestPoly2Reduced;

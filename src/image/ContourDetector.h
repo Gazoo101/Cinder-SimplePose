@@ -23,13 +23,14 @@ public:
 	~ContourDetector();
 
 	void process( ci::Channel8uRef surface );
-	void processContoursToCandidateSquares();
 
 	ci::Channel8uRef getDebugImg() { return mImageDebug; };
 
 	void drawAllContours();
 
 	void testContourCalculation();
+
+	std::vector<Contour> const & getContours() { return mContours; }
 
 private:
 

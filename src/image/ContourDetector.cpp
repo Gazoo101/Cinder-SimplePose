@@ -20,7 +20,7 @@
 ContourDetector::ContourDetector(unsigned int const & incomingImagesWidth, unsigned int const & incomingImagesHeight) :
 	kmIncomingImgsWidth( incomingImagesWidth ),
 	kmIncomingImgsHeight( incomingImagesHeight ),
-	kmImgBorderedWidth( incomingImagesWidth + 2),
+	kmImgBorderedWidth( incomingImagesWidth + 2 ),
 	kmImgBorderedHeight( incomingImagesHeight + 2 )
 {
 	mContourMap = std::unique_ptr<ContourMap>( new ContourMap( kmImgBorderedWidth, kmImgBorderedHeight) );
@@ -193,7 +193,7 @@ Contour ContourDetector::annotateContour( ci::ivec2 const &pos, Contour::TYPE co
 
 void ContourDetector::drawAllContours()
 {
-	for ( auto & contour : mContours )
+	for ( auto const & contour : mContours )
 	{
 		contour.draw();
 	}
