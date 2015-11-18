@@ -6,15 +6,13 @@
 * All other rights reserved.
 */
 
-#define CI_MIN_LOG_LEVEL 0
+#define CI_MIN_LOG_LEVEL 4
 
 #include "ContourDetector.h"
 #include "ContourMap.h"
 #include "Contour.h"
 
 #include "cinder/Log.h"
-
-#include "psimpl_v7_src/psimpl.h"
 
 #include "cinder/gl/draw.h"	// temp
 #include "cinder/gl/wrapper.h"
@@ -37,28 +35,18 @@ ContourDetector::~ContourDetector()
 
 }
 
-
-void ContourDetector::testProcess()
-{
-	// Make ContourMap nice and small.
-	mContourMap.reset();
-
-	mContourMap = std::unique_ptr<ContourMap>( new ContourMap( 13, 8 ) );
-	//mContourMap->createTestCase();
-	mContourMap->createTestCase2();
-	//mContourMap->createTestCase3();
-
-	//mContourMap->printAsASCII();
-
-}
-
 void ContourDetector::process( ci::Channel8uRef surface )
 {
-	CI_LOG_V("Contour detection: [start]");
-	mContours.clear();
-
 	// Set binary-based 255 channel as new contourmap
-	mContourMap->update( surface ); // cancelled for testProcess
+	mContourMap->update( surface );
+
+	detectContours();
+}
+
+void ContourDetector::detectContours()
+{
+	mContours.clear();
+	CI_LOG_V( "Contour detection: [start]" );
 
 	// find them contours!
 	mContourCounter = 1;
@@ -83,7 +71,7 @@ void ContourDetector::process( ci::Channel8uRef surface )
 			{
 				if ( ( pixelValue == 1 ) && ( lastPixelValue == 0 ) )
 				{
-					CI_LOG_V( "Contour Detected - Pos: " << innerIter.getPos() <<" Type: Outer" );
+					CI_LOG_V( "Contour Detected - Pos: " << innerIter.getPos() << " Type: Outer" );
 					mContours.emplace_back( annotateContour( innerIter.getPos(), Contour::TYPE::OUTER, ContourMap::NeighborDirectionCW::LEFT ) );
 					//CI_LOG_D( "[Contour added ID = " << mContourCounter << ", outer, containing " << mContours.back().mCoords.size() << " pixels]" );
 				}
@@ -98,7 +86,7 @@ void ContourDetector::process( ci::Channel8uRef surface )
 					mContours.emplace_back( annotateContour( innerIter.getPos(), Contour::TYPE::HOLE, ContourMap::NeighborDirectionCW::RIGHT ) );
 					//CI_LOG_D( "[Contour added ID = " << mContourCounter << ", hole, containing " << mContours.back().mCoords.size() << " pixels]" );
 				}
-			
+
 				// We used the iter here, as annotateContour may have changed the pixel value
 				if ( innerIter.v() != 1 )
 				{
@@ -121,7 +109,6 @@ Contour ContourDetector::annotateContour( ci::ivec2 const &pos, Contour::TYPE co
 	// We've discovered a new contour!
 	++mContourCounter;
 	Contour contour( mContourCounter, 0 );
-	contour.addPoint( pos );
 
 	// Clock-wise Neighborhood Iterator
 	auto cwNBIter = mContourMap->getCWNBIter( pos, startingDirCW );
@@ -143,7 +130,6 @@ Contour ContourDetector::annotateContour( ci::ivec2 const &pos, Contour::TYPE co
 			// Counter clockwise Neighborhood Iterator
 			//contour.addPoint( centerPos );
 			auto index = cwNBIter.index();
-			auto test = ( ( index + 7 ) % 8 );
 			auto direction = mContourMap->getCCWMinusOnefromCWIndex( index );
 			auto ccwNBIter = mContourMap->getCCWNBIter( ccwContourCrawlCenterPos, direction );
 			CI_LOG_V( "Counter clock-wise checking pixels around pos " << ccwContourCrawlCenterPos << " starting in direction " << mContourMap->getCCWDirString( direction ) );
@@ -153,17 +139,17 @@ Contour ContourDetector::annotateContour( ci::ivec2 const &pos, Contour::TYPE co
 				if ( ccwNBIter.v() != 0 )
 				{
 					CI_LOG_V( "Neighboring NON-0 pixel found during iteration at pos " << ccwNBIter.getPos() );
-					
+					contour.addPoint( ccwContourCrawlCenterPos );
 
 					// If right neighbor examined and it happened to be a 0-pixel...
 					if ( ccwNBIter.visited( static_cast<unsigned char>( ContourMap::NeighborDirectionCCW::RIGHT ) ) && mContourMap->getValue( ccwContourCrawlCenterPos + ci::ivec2( 1, 0 ) ) == 0 )
 					{
-						CI_LOG_V( "Set valuea at pos " << ccwContourCrawlCenterPos << " to " << -( mContourCounter ) );
+						CI_LOG_V( "Set value at pos " << ccwContourCrawlCenterPos << " to " << -( mContourCounter ) );
 						mContourMap->setValue( ccwContourCrawlCenterPos, -( mContourCounter ) );
 
 					} else if ( mContourMap->getValue( ccwContourCrawlCenterPos ) == 1 )
 					{
-						CI_LOG_V( "Set valuea at pos " << ccwContourCrawlCenterPos << " to " << -( mContourCounter ) );
+						CI_LOG_V( "Set value at pos " << ccwContourCrawlCenterPos << " to " << -( mContourCounter ) );
 						mContourMap->setValue( ccwContourCrawlCenterPos, mContourCounter );
 					}
 
@@ -177,8 +163,6 @@ Contour ContourDetector::annotateContour( ci::ivec2 const &pos, Contour::TYPE co
 						//mContourMap->printAsASCII();
 						return std::move( contour );
 					}
-
-					contour.addPoint( ccwContourCrawlCenterPos );
 					
 					// If we're not back at the beginning, swap places and restart the search!
 					ccwContourCrawlCenterPos = ccwNBIter.getPos();
@@ -196,6 +180,9 @@ Contour ContourDetector::annotateContour( ci::ivec2 const &pos, Contour::TYPE co
 		}
 	}
 
+	// Single point contour
+	contour.addPoint( pos );
+
 	// We did not find a non-0 pixel
 	mContourMap->setValue( pos, -(mContourCounter) );
 	CI_LOG_V( "[Contour Complete ID = " << mContourCounter << "]" );
@@ -212,67 +199,21 @@ void ContourDetector::drawAllContours()
 	}
 }
 
-void ContourDetector::drawTestPolys()
+void ContourDetector::testContourCalculation()
 {
-	ci::gl::color( ci::Color("green"));
-	ci::gl::draw( mTestPoly1 );
+	// Make ContourMap nice and small.
+	mContourMap.reset();
 
-	ci::gl::color( ci::Color( "red" ) );
-	ci::gl::draw( mTestPoly1Reduced );
+	mContourMap = std::unique_ptr<ContourMap>( new ContourMap( 13, 8 ) );
+	//mContourMap->createTestCase();
+	mContourMap->createTestCase2();
+	//mContourMap->createTestCase3();
 
-}
+	detectContours();
 
-void ContourDetector::testSimplification()
-{
-	mTestPoly1.push_back( ci::vec2( 20, 20 ) );
-	mTestPoly1.push_back( ci::vec2( 30, 40 ) );
-	mTestPoly1.push_back( ci::vec2( 70, 140 ) );
-	mTestPoly1.push_back( ci::vec2( 10, 99 ) );
+	mContourMap->printAsASCII();
 
-	for ( float x = 30; x < 500; ++x )
-	{
-		mTestPoly1.push_back( ci::vec2( x, 200 + 200 * sin( x / 100 ) ) );
-		CI_LOG_V( "pos " << ci::vec2( x, 200 + 200 * sin( x / 100 ) ) );
-	}
-
-	std::list<float> aList;
-
-	for ( auto const & temp : mTestPoly1 )
-	{
-		aList.push_back( temp.x );
-		aList.push_back( temp.y );
-		CI_LOG_V( "this a coord?" << temp );
-	}
-
-	auto begin = aList.begin();
-	auto end = aList.end();
-
-	std::vector<float> aVec;
-
-	psimpl::simplify_douglas_peucker<2>( begin, end, 3, std::back_inserter( aVec ) );
-
-	for ( int vecIndex = 0; vecIndex < aVec.size(); )
-	{
-		mTestPoly1Reduced.push_back( ci::vec2( aVec[vecIndex], aVec[vecIndex + 1] ) );
-
-		vecIndex += 2;
-	}
-	
-	
-}
-
-void ContourDetector::processContoursToCandidateSquares()
-{
-	for ( auto & contour : mContours )
-	{
-		std::list<int>::const_iterator begin = contour.mCoordsComplex.begin();
-		std::list<int>::const_iterator end = contour.mCoordsComplex.end();
-
-		// In original implementation, Epsilon was:
-		// cvContourPerimeter(mInnerContours)*0.02
-		// Essentially the length of the contour * 0.02
-
-		// 2 dimentions
-		psimpl::simplify_douglas_peucker<2>( begin, end, 3, std::back_inserter( contour.mCoordsSimple ) );
-	}
+	// Reset so test fits intended original
+	mContourMap.reset();
+	mContourMap = std::unique_ptr<ContourMap>( new ContourMap( kmImgBorderedWidth, kmImgBorderedHeight ) );
 }

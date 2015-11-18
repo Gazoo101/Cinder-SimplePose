@@ -96,10 +96,10 @@ void ContourMap::createTestCase()
 
 void ContourMap::createTestCase2()
 {
-	// 1 1   1
-	//
-	// 1 1
-	// 1 1   1
+	// 1 1   1  1
+	//          1
+	// 1 1      1
+	// 1 1   1  1
 	//
 
 	// Individual 1's
@@ -107,12 +107,19 @@ void ContourMap::createTestCase2()
 	mData.get()[( kmWidth * 2 ) + 3] = 1;
 	mData.get()[( kmWidth * 2 ) + 5] = 1;
 
+	mData.get()[( kmWidth * 2 ) + 7] = 1;
+	mData.get()[( kmWidth * 3 ) + 7] = 1;
+
 	mData.get()[( kmWidth * 4 ) + 2] = 1;
 	mData.get()[( kmWidth * 4 ) + 3] = 1;
+
+	mData.get()[( kmWidth * 4 ) + 7] = 1;
 
 	mData.get()[( kmWidth * 5 ) + 2] = 1;
 	mData.get()[( kmWidth * 5 ) + 3] = 1;
 	mData.get()[( kmWidth * 5 ) + 5] = 1;
+
+	mData.get()[( kmWidth * 5 ) + 7] = 1;
 }
 
 void ContourMap::createTestCase3()

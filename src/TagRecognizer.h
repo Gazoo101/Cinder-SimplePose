@@ -12,8 +12,8 @@ TagRecognizer takes care of knowing what sized tags we can recognize (bit patter
 
 */
 
-#ifndef TAG_RECOGNIZER
-#define TAG_RECOGNIZER
+#ifndef SIMPLEPOSE_TAG_RECOGNIZER
+#define SIMPLEPOSE_TAG_RECOGNIZER
 
 #include "cinder/Surface.h"
 
@@ -43,4 +43,4 @@ private:
 
 };
 
-#endif /* TAG_RECOGNIZER */
+#endif /* SIMPLEPOSE_TAG_RECOGNIZER */

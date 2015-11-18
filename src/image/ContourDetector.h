@@ -6,8 +6,8 @@
 * All other rights reserved.
 */
 
-#ifndef CONTOURDETECTOR
-#define CONTOURDETECTOR
+#ifndef SIMPLEPOSE_CONTOUR_DETECTOR
+#define SIMPLEPOSE_CONTOUR_DETECTOR
 
 #include "cinder/Surface.h"
 #include "Contour.h"	// Required due to enum
@@ -25,17 +25,15 @@ public:
 	void process( ci::Channel8uRef surface );
 	void processContoursToCandidateSquares();
 
-
 	ci::Channel8uRef getDebugImg() { return mImageDebug; };
 
 	void drawAllContours();
-	void drawTestPolys();
 
-	void testProcess();
-	void testSimplification();
+	void testContourCalculation();
 
 private:
 
+	void detectContours();
 	Contour annotateContour( ci::ivec2 const &pos, Contour::TYPE const & borderType, ContourMap::NeighborDirectionCW const & startingDirCW );
 
 	inline unsigned int const posToIndex( ci::ivec2 const &pos ) { return ( pos.y * kmImgBorderedWidth ) + pos.x; };
@@ -53,11 +51,8 @@ private:
 	std::unique_ptr<ContourMap> mContourMap;
 	std::vector<Contour> mContours;
 
-	ci::PolyLine2f mTestPoly1, mTestPoly1Reduced;
-	ci::PolyLine2f mTestPoly2, mTestPoly2Reduced;
-
 	unsigned int const kmIncomingImgsWidth, kmIncomingImgsHeight;
 	unsigned int const kmImgBorderedWidth, kmImgBorderedHeight;
 };
 
-#endif /* CONTOURDETECTOR */
+#endif /* SIMPLEPOSE_CONTOUR_DETECTOR */

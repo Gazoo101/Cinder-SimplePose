@@ -6,8 +6,8 @@
 * All other rights reserved.
 */
 
-#ifndef CONTOUR
-#define CONTOUR
+#ifndef SIMPLEPOSE_CONTOUR
+#define SIMPLEPOSE_CONTOUR
 
 #include <list>
 #include "cinder/Color.h"
@@ -39,20 +39,23 @@ struct Contour {
 
 	void addPoint( ci::ivec2 const & pos )
 	{
+		mCoords.push_back( pos );
 		mPolyLine.push_back( pos );
-		//mCoords.push_back( pos );
+		//mCoordsComplex.push_back( pos.x );
+		//mCoordsComplex.push_back( pos.y );
 	};
+
+
 
 	void draw();
 
 	int const mId;
 	int const mParentContourId;
 
-	
-	//std::vector<ci::ivec2> mCoords;
+	std::vector<ci::vec2> mCoords;
 
-	std::list<int> mCoordsComplex;
-	std::vector<int> mCoordsSimple;
+	//std::list<int> mCoordsComplex;
+	//std::vector<int> mCoordsSimple;
 
 	// For rendering purposes
 	ci::Color mColor;
@@ -60,4 +63,4 @@ struct Contour {
 
 };
 
-#endif /* CONTOUR */
+#endif /* SIMPLEPOSE_CONTOUR */

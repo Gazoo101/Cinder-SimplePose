@@ -6,8 +6,8 @@
 * All other rights reserved.
 */
 
-#ifndef TAG
-#define TAG
+#ifndef SIMPLEPOSE_TAG
+#define SIMPLEPOSE_TAG
 
 #include "cinder/Noncopyable.h"
 #include <vector>
@@ -45,4 +45,4 @@ struct Tag : private cinder::Noncopyable
 	unsigned long long const kmId;
 };
 
-#endif /* TAG */
+#endif /* SIMPLEPOSE_TAG */

@@ -6,8 +6,8 @@
 * All other rights reserved.
 */
 
-#ifndef TAGBITPATTERN
-#define TAGBITPATTERN
+#ifndef SIMPLEPOSE_TAGBITPATTERN
+#define SIMPLEPOSE_TAGBITPATTERN
 
 #define BIT_PATTERN_MAX_SIZE 36
 
@@ -160,4 +160,4 @@ private:
 	unsigned short const kmBitPatternSizeMax = 6;
 };
 
-#endif /* TAGBITPATTERN */
+#endif /* SIMPLEPOSE_TAGBITPATTERN */

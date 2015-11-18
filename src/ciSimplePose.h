@@ -6,16 +6,19 @@
 * All other rights reserved.
 */
 
-#ifndef CISIMPLEPOSE
-#define CISIMPLEPOSE
+#ifndef SIMPLEPOSE_SIMPLEPOSE
+#define SIMPLEPOSE_SIMPLEPOSE
 
 #include "cinder/Surface.h"
 #include "cinder/gl/Texture.h"
+
+#include "cinder/Timer.h"	// For performance measurements/improvements only
 
 // Forward declarations
 class TagRecognizer;
 class AdaptiveThresholdBinarization;
 class ContourDetector;
+class PolygonApproximator;
 
 class CiSimplePose {
 	
@@ -39,6 +42,8 @@ public:
 
 	void drawAllContours();
 
+	void unitTest();
+
 private:
 
 	ci::Channel8uRef processIncomingToGrayscale( ci::Surface8uRef surface );
@@ -54,9 +59,16 @@ private:
 
 	std::unique_ptr<TagRecognizer> mTagRecognizer;
 
+	//ci::Timer mPerformanceTimer;
+
+	//std::array<double, 20> mTimeToGrayscale;
+	//std::array<double, 20> mTimeToBinary;
+
+
 	// Image Processing Objects
 	std::unique_ptr<AdaptiveThresholdBinarization> mBinarizer;
 	std::unique_ptr<ContourDetector> mContourFinder;
+	std::unique_ptr<PolygonApproximator> mPolygonApproximator;
 };
 
-#endif /* CISIMPLEPOSE */
+#endif /* SIMPLEPOSE_SIMPLEPOSE */

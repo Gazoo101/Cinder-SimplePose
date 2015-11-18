@@ -16,6 +16,7 @@
 // Image Processing
 #include "image/AdaptiveThresholdBinarization.h"
 #include "image/ContourDetector.h"
+#include "image/PolygonApproximator.h"
 
 CiSimplePose::CiSimplePose( unsigned int const & incomingImagesWidth, unsigned int const & incomingImagesHeight ) :
 	kmIncomingImgsWidth( incomingImagesWidth ),
@@ -24,6 +25,7 @@ CiSimplePose::CiSimplePose( unsigned int const & incomingImagesWidth, unsigned i
 	// Raii principles
 	mBinarizer = std::unique_ptr<AdaptiveThresholdBinarization>( new AdaptiveThresholdBinarization( incomingImagesWidth, incomingImagesHeight ) );
 	mContourFinder = std::unique_ptr<ContourDetector>( new ContourDetector( incomingImagesWidth, incomingImagesHeight ) );
+	mPolygonApproximator = std::unique_ptr<PolygonApproximator>( new PolygonApproximator() );
 
 	mTagRecognizer = std::unique_ptr<TagRecognizer>( new TagRecognizer(4) );
 
@@ -45,17 +47,6 @@ CiSimplePose::CiSimplePose( unsigned int const & incomingImagesWidth, unsigned i
 
 	mTexDebug = ci::gl::Texture2d::create( *temp );
 
-	auto chanIter = mImgBinary->getIter();
-
-	while ( chanIter.line() )
-	{
-		while ( chanIter.pixel() )
-		{
-			chanIter.v() = ci::randInt( 0, 255 );
-		}
-	}
-
-	mContourFinder->testSimplification();
 }
 
 CiSimplePose::~CiSimplePose()
@@ -68,18 +59,16 @@ ci::Surface8uRef CiSimplePose::getTagTex( unsigned int const &numTags ) { return
 
 void CiSimplePose::detectTags( ci::Surface8uRef surface )
 {
-	//mContourFinder->testSimplification();
+	// Convert to grayscale
+	auto imgGrayScale = ci::Channel8u::create( *surface );
+	mTexGrayscale->update( *imgGrayScale );
 
-	//// Convert to grayscale
-	//auto imgGrayScale = ci::Channel8u::create( *surface );
-	//mTexGrayscale->update( *imgGrayScale );
+	// Apply adaptive thresholding
+	mImgBinary = mBinarizer->process( imgGrayScale );
+	mTexBinary->update( *mImgBinary );
 
-	//// Apply adaptive thresholding
-	//mImgBinary = mBinarizer->process( imgGrayScale );
-	//mTexBinary->update( *mImgBinary );
-
-	//// Detect Contours
-	//mContourFinder->process( mImgBinary );
+	// Detect Contours
+	mContourFinder->process( mImgBinary );
 	//mContourFinder->processContoursToCandidateSquares();
 
 
@@ -105,7 +94,7 @@ void CiSimplePose::drawAllContours()
 {
 	//mContourFinder->drawAllContours();
 
-	mContourFinder->drawTestPolys();
+	mPolygonApproximator->drawTestPolys();
 }
 
 ci::Channel8uRef CiSimplePose::processIncomingToGrayscale( ci::Surface8uRef surface )
@@ -135,4 +124,12 @@ void CiSimplePose::detectSquaresInBinary( ci::Surface8uRef surface )
 void CiSimplePose::detectTagsInSquares( ci::Surface8uRef surface )
 {
 
+}
+
+
+void CiSimplePose::unitTest()
+{
+	mContourFinder->testContourCalculation();
+
+	mPolygonApproximator->testSimplification();
 }
