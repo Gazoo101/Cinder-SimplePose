@@ -30,7 +30,7 @@ public:
 
 	void testContourCalculation();
 
-	std::vector<Contour> const & getContours() { return mContours; }
+	std::vector<Contour> const & getContours() const { return mContours; }
 
 private:
 

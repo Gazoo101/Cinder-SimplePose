@@ -19,6 +19,8 @@ class TagRecognizer;
 class AdaptiveThresholdBinarization;
 class ContourDetector;
 class PolygonApproximator;
+struct Contour;
+struct Polygon;
 
 class CiSimplePose {
 	
@@ -40,8 +42,12 @@ public:
 	ci::gl::Texture2dRef getTextureTags() { return mTexTags; };
 	ci::gl::Texture2dRef getTextureDebug() { return mTexDebug; };
 
-	void drawAllContours();
-	void drawAllPolygonSquares();
+	void drawAllContours() const;
+	void drawTagSizedContours() const;
+
+	void drawPolygonsAll() const;
+	void drawPolygonsConvexOnly() const;
+	void drawPolygonsSquaresOnly() const;
 
 	void unitTest();
 
@@ -59,6 +65,11 @@ private:
 	unsigned int const kmIncomingImgsWidth, kmIncomingImgsHeight;
 
 	std::unique_ptr<TagRecognizer> mTagRecognizer;
+
+	std::vector<Contour> mContoursTagSized;
+
+	std::vector<Polygon> mPolygonsConvex;
+	std::vector<Polygon> mPolygonsSquare;
 
 	//ci::Timer mPerformanceTimer;
 

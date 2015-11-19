@@ -32,8 +32,8 @@ void PolygonApproximator::process( std::vector<Contour> const & contours )
 {
 	mPolygons.clear();
 
-	auto polygons = approximatePolygonsFromContours( contours );
-	mPolygons = filterPolygons( polygons );
+	mPolygons = approximatePolygonsFromContours( contours );
+	//mPolygons = filterPolygons( mPolygons );
 }
 
 std::vector<Polygon> PolygonApproximator::approximatePolygonsFromContours( std::vector<Contour> const & contours )
@@ -58,12 +58,14 @@ std::vector<Polygon> PolygonApproximator::approximatePolygonsFromContours( std::
 		}
 
 		std::vector<int>::const_iterator begin = contourCoords.begin();
-		std::vector<int>::const_iterator end = contourCoords.begin();
+		std::vector<int>::const_iterator end = contourCoords.end();
 
 		// In original implementation, Epsilon was:
 		// cvContourPerimeter(mInnerContours)*0.02
 		// Essentially the length of the contour * 0.02
-		psimpl::simplify_douglas_peucker<2>( begin, end, 2, std::back_inserter( approximatedPolygonCoords ) );
+		CI_LOG_V("Contour to approximate to polygon with: " << contourCoords.size() << " num coords" );
+		psimpl::simplify_douglas_peucker<2>( begin, end, contour.calcPerimeter() * 0.02, std::back_inserter( approximatedPolygonCoords ) );
+		CI_LOG_V( "Approximated polygon with: " << approximatedPolygonCoords.size() << " num coords" );
 
 		approximatedPolygons.emplace_back( Polygon( approximatedPolygonCoords ));
 	}
@@ -179,5 +181,4 @@ void PolygonApproximator::drawTestPolys()
 
 	ci::gl::color( ci::Color( "purple" ) );
 	ci::gl::draw( mTestPoly2Reduced );
-
 }

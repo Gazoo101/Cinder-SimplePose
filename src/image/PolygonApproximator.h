@@ -31,6 +31,8 @@ public:
 
 	void drawTestPolys();
 
+	std::vector<Polygon> const & getPolygons() const { return mPolygons; }
+
 private:
 
 	std::vector<Polygon> approximatePolygonsFromContours( std::vector<Contour> const & contours );

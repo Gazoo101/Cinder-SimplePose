@@ -160,6 +160,9 @@ Contour ContourDetector::annotateContour( ci::ivec2 const &pos, Contour::TYPE co
 						CI_LOG_V( "[Contour Complete ID = " << mContourCounter << "]" );
 						// End
 
+						// Add a point that closes the loop on the Contour
+						contour.addPoint( contourStartPos );
+
 						//mContourMap->printAsASCII();
 						return std::move( contour );
 					}

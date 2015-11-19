@@ -45,7 +45,7 @@ struct Contour {
 		//mCoordsComplex.push_back( pos.y );
 	};
 
-
+	float const calcPerimeter() const;
 
 	void draw() const;
 

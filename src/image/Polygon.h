@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "cinder/Color.h"
-#include "cinder/Rand.h"
 #include "cinder/PolyLine.h"
 
 struct Polygon {
@@ -24,9 +23,9 @@ struct Polygon {
 
 	void draw() const;
 
-	bool isConvex();
+	bool isConvex() const;
 
-	float getContainedArea();
+	float getContainedArea() const;
 
 	std::vector<ci::vec2> mCoords;
 

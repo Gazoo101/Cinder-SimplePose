@@ -18,6 +18,8 @@
 #include "image/ContourDetector.h"
 #include "image/PolygonApproximator.h"
 
+#include "image/Polygon.h"
+
 CiSimplePose::CiSimplePose( unsigned int const & incomingImagesWidth, unsigned int const & incomingImagesHeight ) :
 	kmIncomingImgsWidth( incomingImagesWidth ),
 	kmIncomingImgsHeight( incomingImagesHeight )
@@ -59,6 +61,10 @@ ci::Surface8uRef CiSimplePose::getTagTex( unsigned int const &numTags ) { return
 
 void CiSimplePose::detectTags( ci::Surface8uRef surface )
 {
+	mContoursTagSized.clear();
+	mPolygonsConvex.clear();
+	mPolygonsSquare.clear();
+
 	// Convert to grayscale
 	auto imgGrayScale = ci::Channel8u::create( *surface );
 	mTexGrayscale->update( *imgGrayScale );
@@ -70,8 +76,27 @@ void CiSimplePose::detectTags( ci::Surface8uRef surface )
 	// Detect Contours
 	mContourFinder->process( mImgBinary );
 
+	// Filter contours that aren't big enough
+	auto contours = mContourFinder->getContours();
+
+	std::copy_if( contours.begin(), contours.end(), std::back_inserter( mContoursTagSized ),
+		[]( Contour const & contour ) { return contour.calcPerimeter() > 100.0f; } );
+
 	// Approximate Polygons from Contours and filter polygons to retain only possible tags
-	mPolygonApproximator->process( mContourFinder->getContours() );
+	mPolygonApproximator->process( mContoursTagSized );
+
+	// Filter polygons that are not convex
+	auto polygons = mPolygonApproximator->getPolygons();
+
+	std::copy_if( polygons.begin(), polygons.end(), std::back_inserter( mPolygonsConvex ),
+		[]( Polygon const & polygon ) { return polygon.isConvex(); } );
+
+
+	// Fix
+	std::copy_if( mPolygonsConvex.begin(), mPolygonsConvex.end(), std::back_inserter( mPolygonsSquare ),
+		[]( Polygon const & polygon ) { return polygon.isConvex(); } );
+
+
 
 
 
@@ -90,16 +115,40 @@ void CiSimplePose::detectTags( ci::Surface8uRef surface )
 	// Put the location or something in vector ready to return
 }
 
-void CiSimplePose::drawAllContours()
+void CiSimplePose::drawAllContours() const
 {
 	mContourFinder->drawAllContours();
 
 	//mPolygonApproximator->drawTestPolys();
 }
 
-void CiSimplePose::drawAllPolygonSquares()
+void CiSimplePose::drawTagSizedContours() const
+{
+	for ( auto const & contour : mContoursTagSized )
+	{
+		contour.draw();
+	}
+}
+
+void CiSimplePose::drawPolygonsAll() const
 {
 	mPolygonApproximator->drawAllPolygons();
+}
+
+void CiSimplePose::drawPolygonsConvexOnly() const
+{
+	for ( auto const & polygon : mPolygonsConvex )
+	{
+		polygon.draw();
+	}
+}
+
+void CiSimplePose::drawPolygonsSquaresOnly() const
+{
+	for ( auto const & polygon : mPolygonsSquare )
+	{
+		polygon.draw();
+	}
 }
 
 ci::Channel8uRef CiSimplePose::processIncomingToGrayscale( ci::Surface8uRef surface )
