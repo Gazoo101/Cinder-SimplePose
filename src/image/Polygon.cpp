@@ -93,7 +93,6 @@ bool Polygon::isConvex() const
 
 	}
 
-
 	return true;
 }
 
@@ -101,22 +100,22 @@ float Polygon::getContainedArea() const
 {
 	float area = 0.0f;
 
-	if ( mCoords.size() > 1 )
-	{
-		auto posPrevIter = mCoords.begin();
-		for ( auto posIter = ++posPrevIter; posIter != mCoords.end(); ++posIter )
-		{
+	//if ( mCoords.size() > 1 )
+	//{
+	//	auto posPrevIter = mCoords.begin();
+	//	for ( auto posIter = ++posPrevIter; posIter != mCoords.end(); ++posIter )
+	//	{
 
-		//	float dx, dy;
+	//	//	float dx, dy;
 
-		//	dx = posIter->x - posPrevIter->x;
-		//	dy = posIter->y - posPrevIter->y;
+	//	//	dx = posIter->x - posPrevIter->x;
+	//	//	dy = posIter->y - posPrevIter->y;
 
-		//	perimeter += std::sqrtf( dx * dx + dy * dy );
+	//	//	perimeter += std::sqrtf( dx * dx + dy * dy );
 
-		//	posPrevIter = posIter;
-		}
-	}
+	//	//	posPrevIter = posIter;
+	//	}
+	//}
 
 	return area;
 }

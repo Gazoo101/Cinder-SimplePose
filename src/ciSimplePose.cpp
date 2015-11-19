@@ -8,7 +8,7 @@
 
 #include "ciSimplePose.h"
 
-#include "TagRecognizer.h"
+#include "tag/TagRecognizer.h"
 
 #include "cinder/Log.h"
 #include "cinder/Rand.h"
@@ -94,7 +94,7 @@ void CiSimplePose::detectTags( ci::Surface8uRef surface )
 
 	// Fix
 	std::copy_if( mPolygonsConvex.begin(), mPolygonsConvex.end(), std::back_inserter( mPolygonsSquare ),
-		[]( Polygon const & polygon ) { return polygon.isConvex(); } );
+		[]( Polygon const & polygon ) { return polygon.isSquare(); } );
 
 
 

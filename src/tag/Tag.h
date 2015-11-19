@@ -15,7 +15,10 @@
 
 #include "cinder/gl/Texture.h"
 
-struct Tag : private cinder::Noncopyable
+// Forward declarations
+struct Polygon;
+
+struct Tag
 {
 	Tag() :
 		kmId( 0 )
@@ -29,12 +32,22 @@ struct Tag : private cinder::Noncopyable
 
 	}
 
-	// Move Operators!
-	Tag( Tag&& other ) :
-		kmId( other.kmId )
+	enum class STATE : unsigned char
 	{
-	}
-	Tag& operator=( Tag&& ) { return *this; }
+		NOT_RECOGNIZED,
+		RECOGNIZED
+	};
+
+	virtual Tag * clone( unsigned long long const &id ) = 0;
+	virtual long long detect( ci::Channel8uRef binaryImg, Polygon const & potentialTagOutline ) = 0;
+
+	//// Move Operators!
+	//Tag( Tag&& other ) :
+	//	kmId( other.kmId )
+	//{
+	//}
+	//Tag& operator=( Tag&& ) { return *this; }
+
 
 	virtual ci::gl::Texture2dRef getTagAsTexture() = 0;
 

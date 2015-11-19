@@ -18,9 +18,9 @@
 
 struct TagBitPattern : public Tag
 {
-	TagBitPattern() :
+	TagBitPattern( unsigned short const &bitPatternDimSize ) :
 		Tag(),
-		kmBitPatternDimSize( 0 )
+		kmBitPatternDimSize( bitPatternDimSize )
 	{
 
 	}
@@ -30,28 +30,18 @@ struct TagBitPattern : public Tag
 		kmBitPatternDimSize( bitPatternDimSize )
 	{
 		mBitPattern = std::bitset<BIT_PATTERN_MAX_SIZE>( id );
-
-		//mBitPattern = std::unique_ptr< bool[] >( new bool[bitPatternSize*bitPatternSize] );
-		// Turn ID into bit pattern
-
-		auto test = std::bitset< BIT_PATTERN_MAX_SIZE >( id );
-
-		//mBitPattern2 = std::bitset< 36 >( 22 );
-
-		auto test2 = std::bitset< BIT_PATTERN_MAX_SIZE >( 0 );
-
-		test2[8] = 1;
-
-		//mBitPattern = new bool[bitPatternSize][bitPatternSize];
 	}
 
-	// Move Operators!
-	TagBitPattern( TagBitPattern&& other ) :
-		Tag( std::move( static_cast<Tag&>( other ) ) ),
-		kmBitPatternDimSize( other.kmBitPatternDimSize )
-	{
-	}
-	TagBitPattern& operator=( TagBitPattern&& ) { return *this; }
+	virtual Tag * clone( unsigned long long const &id ) override { return new TagBitPattern( kmBitPatternDimSize, id ); };
+	virtual long long detect( ci::Channel8uRef binaryImg, Polygon const & potentialTagOutline ) override;
+
+	//// Move Operators!
+	//TagBitPattern( TagBitPattern&& other ) :
+	//	Tag( std::move( static_cast<Tag&>( other ) ) ),
+	//	kmBitPatternDimSize( other.kmBitPatternDimSize )
+	//{
+	//}
+	//TagBitPattern& operator=( TagBitPattern&& ) { return *this; }
 
 	ci::gl::Texture2dRef getTagAsTexture() override
 	{

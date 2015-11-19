@@ -10,9 +10,17 @@
 #include "TagBitPattern.h"
 #include "cinder/Log.h"
 
+#include "image/Polygon.h"
+
 TagRecognizer::TagRecognizer( unsigned short const &bitPatternSize ) :
 kmBitPatternSize( bitPatternSize )
 {
+	/* Each recognizable Tag Type is added here. */
+	mRecognizedTagsTypes.emplace_back( std::unique_ptr<TagBitPattern>( new TagBitPattern( bitPatternSize ) ) );
+
+
+
+
 	if ( kmBitPatternSize > kmMaxBitPattern )
 	{
 		CI_LOG_W( "Selected bit Pattern size (" << kmBitPatternSize << ") larger than max (" << kmMaxBitPattern << "), detection disabled." );
@@ -51,7 +59,7 @@ void TagRecognizer::generateTags()
 				mInvalidTags.push_back( dupeId );
 			}
 
-			mRecognizedTags.emplace_back( std::move( tag ) );
+			//mRecognizedTags.emplace_back( std::move( tag ) );
 		}
 	}
 }
@@ -59,4 +67,32 @@ void TagRecognizer::generateTags()
 ci::Surface8uRef TagRecognizer::getTagTex( unsigned int const &numTags )
 {
 	return ci::Surface::create( 32, 32, true );
+}
+
+void TagRecognizer::process( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares )
+{
+	mDetectedTags.clear();
+
+	for ( auto const & potentialTag : squares )
+	{
+		for ( auto const & knownTagType : mRecognizedTagsTypes )
+		{
+			auto detectedTagId = knownTagType->detect( binaryImg, potentialTag );
+
+			if ( detectedTagId )
+			{
+				mDetectedTags.push_back( knownTagType->clone( detectedTagId ) );
+				//auto detectedTag = knownTagType->clone( detectedTagId );
+
+			}
+		}
+	}
+
+
+	//processSquaresToRecognizableTags( binaryImg, squares );
+}
+
+void TagRecognizer::processSquaresToRecognizableTags( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares )
+{
+
 }

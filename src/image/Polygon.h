@@ -25,6 +25,8 @@ struct Polygon {
 
 	bool isConvex() const;
 
+	inline bool isSquare() const { return mCoords.size() == 5; };
+
 	float getContainedArea() const;
 
 	std::vector<ci::vec2> mCoords;

@@ -18,6 +18,7 @@ TagRecognizer takes care of knowing what sized tags we can recognize (bit patter
 #include "cinder/Surface.h"
 
 struct Tag;
+struct Polygon;
 
 class TagRecognizer {
 
@@ -26,13 +27,19 @@ public:
 	TagRecognizer( unsigned short const &bitPatternSize );
 	~TagRecognizer();
 
+	void process( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares );
+
 	ci::Surface8uRef getTagTex( unsigned int const &numTags );
 
 private:
 
+	void processSquaresToRecognizableTags( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares );
+
 	void generateTags();
 
-	std::vector<std::unique_ptr<Tag>> mRecognizedTags;
+	std::vector<std::unique_ptr<Tag>> mRecognizedTagsTypes;
+	std::vector<Tag> mDetectedTags;
+
 	//std::vector<Tag> mRecognizedTags;
 	std::vector<unsigned long long> mInvalidTags;
 
