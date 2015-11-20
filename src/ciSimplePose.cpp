@@ -22,12 +22,15 @@
 
 #include "image/Polygon.h"
 
+#include "cinder/Camera.h"
+
 CiSimplePose::CiSimplePose( 
 	unsigned int const & incomingImagesWidth,
 	unsigned int const & incomingImagesHeight,
-	ci::mat3 const & intrinsicCameraParameters ) :
+	ci::mat3 const & matIntrinsicCameraParameters ) :
 	kmIncomingImgsWidth( incomingImagesWidth ),
-	kmIncomingImgsHeight( incomingImagesHeight )
+	kmIncomingImgsHeight( incomingImagesHeight ),
+	mMatIntrinsicCameraParameters( matIntrinsicCameraParameters )
 {
 	// Raii principles
 	mBinarizer = std::unique_ptr<AdaptiveThresholdBinarization>( new AdaptiveThresholdBinarization( incomingImagesWidth, incomingImagesHeight ) );
@@ -36,7 +39,7 @@ CiSimplePose::CiSimplePose(
 
 	mTagRecognizer = std::unique_ptr<TagRecognizer>( new TagRecognizer(3) );
 
-	mPoseEstimator = std::unique_ptr<PoseEstimator>( new PoseEstimator( intrinsicCameraParameters ) );
+	mPoseEstimator = std::unique_ptr<PoseEstimator>( new PoseEstimator( matIntrinsicCameraParameters ) );
 
 	// Setup Detection Surfaces
 	mImgGrayScale = ci::Channel8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight );
@@ -171,4 +174,47 @@ void CiSimplePose::unitTest()
 	mContourFinder->testContourCalculation();
 
 	mPolygonApproximator->testSimplification();
+}
+
+//void AR2::calcOpenGLCameraProjMatrix() {
+//	// The implementation as explained for the POSIT in OpenCV
+//	double *intrinsicData = mIntrinsicCameraMat->data.db;
+//
+//	// Row 0
+//	mCameraProjMatrix[0][0] = 2.0 * intrinsicData[0] / mImgFeedWidth;
+//	mCameraProjMatrix[0][1] = 0.0;
+//	mCameraProjMatrix[0][2] = 2.0 * ( intrinsicData[2] / mImgFeedWidth ) - 1.0;
+//	mCameraProjMatrix[0][3] = 0.0;
+//
+//	// Row 1
+//	mCameraProjMatrix[1][0] = 0.0;
+//	mCameraProjMatrix[1][1] = 2.0 * intrinsicData[4] / mImgFeedHeight;
+//	mCameraProjMatrix[1][2] = 2.0 * ( intrinsicData[5] / mImgFeedHeight ) - 1.0;
+//	mCameraProjMatrix[1][3] = 0.0;
+//
+//	// Row 2 (Clipping Plane)
+//	mCameraProjMatrix[2][0] = 0.0;
+//	mCameraProjMatrix[2][1] = 0.0;
+//	mCameraProjMatrix[2][2] = -1.0;
+//	mCameraProjMatrix[2][3] = -0.02;
+//
+//	// Row 3 | Per-definition as follows:
+//	mCameraProjMatrix[3][0] = 0.0;
+//	mCameraProjMatrix[3][1] = 0.0;
+//	mCameraProjMatrix[3][2] = -1.0;
+//	mCameraProjMatrix[3][3] = 0.0;
+//}
+
+void CiSimplePose::matchVirtualCamToRealCamParameters( ci::CameraPersp camPersp )
+{
+	// XXX: setPerspective currently does not allow us to set varying focal point values for x/y
+	// For now pick either/or. They should more or less be identical (otherwise you have some really odd camera stuff going on)
+	auto fov = 0;
+	auto aspectRatio = 0;
+	auto nearPlane = mMatIntrinsicCameraParameters[0]; // (nearClip)
+	// or mMatIntrinsicCameraParameters[4]
+	auto farClip = 0;
+
+
+	//camPersp.setPerspective();
 }

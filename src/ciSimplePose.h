@@ -11,6 +11,8 @@
 
 #include "cinder/Surface.h"
 #include "cinder/gl/Texture.h"
+#include "cinder/Camera.h"
+
 
 #include "cinder/Timer.h"	// For performance measurements/improvements only
 
@@ -30,7 +32,7 @@ public:
 	CiSimplePose( 
 		unsigned int const & incomingImagesWidth, 
 		unsigned int const & incomingImagesHeight,
-		ci::mat3 const & intrinsicCameraParameters );
+		ci::mat3 const & matIntrinsicCameraParameters );
 	~CiSimplePose();
 
 	//getCameraMatrix();	- Todo. Use OpenCV for now.
@@ -57,6 +59,8 @@ public:
 
 	void unitTest();
 
+	void matchVirtualCamToRealCamParameters( ci::CameraPersp camPersp );
+
 private:
 
 	ci::Channel8uRef processIncomingToGrayscale( ci::Surface8uRef surface );
@@ -67,6 +71,8 @@ private:
 	ci::Channel8uRef mImgGrayScale, mImgBinary;		// These images only require a single color channel
 	ci::Surface8uRef mImgContours, mImgSquares, mImgTags;			// These images 'need' color to better differentiate detected elements
 	ci::gl::Texture2dRef mTexGrayscale, mTexBinary, mTexContours, mTexSquares, mTexTags, mTexDebug;
+
+	ci::mat3 mMatIntrinsicCameraParameters;
 
 	unsigned int const kmIncomingImgsWidth, kmIncomingImgsHeight;
 

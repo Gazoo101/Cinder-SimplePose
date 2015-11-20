@@ -23,14 +23,18 @@ public:
 
 private:
 
+	ci::mat4 estimateViewMatrix( ci::vec2 const tagCornerScreenCoords[4] );
+	void extractPositionAndOrientationFromViewMatrix( ci::mat4 const & viewMatrix );
+
 	std::array<ci::vec2, 4> mTagVirtualCoords;
 
-	ci::mat3 mRRTUnscaled;
+	ci::mat3 mMatRRTUnscaled;
+	ci::mat3 mMatRRT;
 
-	ci::mat3 mScale;
+	ci::mat3 mMatScale;
 
-	ci::mat3 mIntrinsicCameraParameters;
-	ci::mat3 mIntrinsicCameraParametersInverse;
+	ci::mat3 mMatIntrinsicCameraParameters;
+	ci::mat3 mMatIntrinsicCameraParametersInverse;
 
 
 	std::unique_ptr<Homography> mHomographyCalculator;

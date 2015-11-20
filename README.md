@@ -5,6 +5,10 @@ This pose-estimator is a modern C++11 re-write of my masters thesis code, with a
 
 ## Version
 
+0.3 - More Alpha
+- Basic not so robust tag detection complete
+- Partial pose estimation implemented
+
 0.2 - Still Alpha
 - Working adaptive binary thresholding algorithm
 - Working contour detection algorithm (Probably needs optimizing)
@@ -25,4 +29,5 @@ To write...
 
 SimplePose is licensed under the new BSD license.
 
+Homography estimation code partially adapted from code by Paul Houx used with permission.
 psimpl - generic n-dimensional polyline simplification is licensed under MPL 1.1.
