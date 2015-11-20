@@ -49,6 +49,8 @@ public:
 	void drawPolygonsConvexOnly() const;
 	void drawPolygonsSquaresOnly() const;
 
+	void drawTagsAll() const;
+
 	void unitTest();
 
 private:

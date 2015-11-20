@@ -31,6 +31,8 @@ public:
 
 	ci::Surface8uRef getTagTex( unsigned int const &numTags );
 
+	void drawDetectedTags();
+
 private:
 
 	void processSquaresToRecognizableTags( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares );
@@ -38,7 +40,7 @@ private:
 	void generateTags();
 
 	std::vector<std::unique_ptr<Tag>> mRecognizedTagsTypes;
-	std::vector<Tag> mDetectedTags;
+	std::vector<std::unique_ptr<Tag>> mDetectedTags;
 
 	//std::vector<Tag> mRecognizedTags;
 	std::vector<unsigned long long> mInvalidTags;

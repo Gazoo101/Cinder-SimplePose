@@ -18,8 +18,11 @@
 // Forward declarations
 struct Polygon;
 
-struct Tag
+class Tag
 {
+
+public:
+
 	Tag() :
 		kmId( 0 )
 	{
@@ -38,8 +41,10 @@ struct Tag
 		RECOGNIZED
 	};
 
-	virtual Tag * clone( unsigned long long const &id ) = 0;
-	virtual long long detect( ci::Channel8uRef binaryImg, Polygon const & potentialTagOutline ) = 0;
+	virtual void draw() const = 0;
+
+	virtual Tag * clone() = 0;
+	virtual bool detect( ci::Channel8uRef binaryImg, Polygon const & potentialTagOutline ) = 0;
 
 	//// Move Operators!
 	//Tag( Tag&& other ) :
@@ -48,6 +53,7 @@ struct Tag
 	//}
 	//Tag& operator=( Tag&& ) { return *this; }
 
+private:
 
 	virtual ci::gl::Texture2dRef getTagAsTexture() = 0;
 

@@ -73,19 +73,26 @@ void TagRecognizer::process( ci::Channel8uRef binaryImg, std::vector<Polygon> co
 {
 	mDetectedTags.clear();
 
-	for ( auto const & potentialTag : squares )
+
+	for ( auto const & knownTagType : mRecognizedTagsTypes )
 	{
-		for ( auto const & knownTagType : mRecognizedTagsTypes )
+		// Clone the detection blueprint
+		auto tagDetectionBlueprint = knownTagType->clone();
+
+		for ( auto const & potentialTag : squares )
 		{
-			auto detectedTagId = knownTagType->detect( binaryImg, potentialTag );
+			auto tagDetected = tagDetectionBlueprint->detect( binaryImg, potentialTag );
 
-			if ( detectedTagId )
+			if ( tagDetected )
 			{
-				mDetectedTags.push_back( knownTagType->clone( detectedTagId ) );
-				//auto detectedTag = knownTagType->clone( detectedTagId );
+				// Blueprint is now a valid tag
+				mDetectedTags.push_back( std::unique_ptr<Tag>( tagDetectionBlueprint ) );
 
+				// Make another blueprint available
+				tagDetectionBlueprint = knownTagType->clone();
 			}
 		}
+
 	}
 
 
@@ -95,4 +102,12 @@ void TagRecognizer::process( ci::Channel8uRef binaryImg, std::vector<Polygon> co
 void TagRecognizer::processSquaresToRecognizableTags( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares )
 {
 
+}
+
+void TagRecognizer::drawDetectedTags()
+{
+	for ( auto const & detectedTag : mDetectedTags )
+	{
+		detectedTag->draw();
+	}
 }

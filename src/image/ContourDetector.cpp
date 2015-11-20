@@ -108,7 +108,7 @@ Contour ContourDetector::annotateContour( ci::ivec2 const &pos, Contour::TYPE co
 {
 	// We've discovered a new contour!
 	++mContourCounter;
-	Contour contour( mContourCounter, 0 );
+	Contour contour( mContourCounter, 0, borderType );
 
 	// Clock-wise Neighborhood Iterator
 	auto cwNBIter = mContourMap->getCWNBIter( pos, startingDirCW );

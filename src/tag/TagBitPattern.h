@@ -16,10 +16,13 @@
 #include <vector>
 #include <bitset>
 
-struct TagBitPattern : public Tag
+class TagBitPattern : public Tag
 {
+public:
+
 	TagBitPattern( unsigned short const &bitPatternDimSize ) :
 		Tag(),
+		mBitPatternValue( 0 ),
 		kmBitPatternDimSize( bitPatternDimSize )
 	{
 
@@ -27,13 +30,16 @@ struct TagBitPattern : public Tag
 
 	TagBitPattern( unsigned short const &bitPatternDimSize, unsigned long long const &id ) :
 		Tag( id ),
+		mBitPatternValue( 0 ),
 		kmBitPatternDimSize( bitPatternDimSize )
 	{
 		mBitPattern = std::bitset<BIT_PATTERN_MAX_SIZE>( id );
 	}
 
-	virtual Tag * clone( unsigned long long const &id ) override { return new TagBitPattern( kmBitPatternDimSize, id ); };
-	virtual long long detect( ci::Channel8uRef binaryImg, Polygon const & potentialTagOutline ) override;
+	virtual void draw() const override;
+
+	virtual Tag * clone() override { return new TagBitPattern( *this ); };
+	virtual bool detect( ci::Channel8uRef binaryImg, Polygon const & potentialTagOutline ) override;
 
 	//// Move Operators!
 	//TagBitPattern( TagBitPattern&& other ) :
@@ -123,9 +129,10 @@ struct TagBitPattern : public Tag
 		return std::move( invalidatedTagIDs );
 	}
 
-	std::bitset<BIT_PATTERN_MAX_SIZE> mBitPattern;
-
 private:
+
+	unsigned long long mBitPatternValue;
+	std::bitset<BIT_PATTERN_MAX_SIZE> mBitPattern;
 
 	void drawSquareOnSurface( ci::Surface8uRef surface, short const & bitPosX, short const & bitPosY )
 	{
@@ -145,6 +152,13 @@ private:
 			}
 		}
 	}
+
+
+	ci::vec2 vecA1Start, vecA1Dir, vecA2Start, vecA2Dir;// , vecADir, vecBStart, vecBDir;
+
+	std::vector<std::pair<ci::vec2, ci::vec2>> bitVecsA, bitVecsB;
+
+	std::vector<ci::vec2> mBitLocations;
 
 	unsigned short const kmBitPatternDimSize;
 	unsigned short const kmBitPatternSizeMax = 6;

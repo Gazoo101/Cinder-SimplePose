@@ -16,25 +16,28 @@
 
 struct Contour {
 
+	enum class TYPE : unsigned char {
+		OUTER,
+		HOLE,
+		UNDEFINED
+	};
+
 	Contour() :
 		mId(0),
-		mParentContourId( 0 )
+		mParentContourId( 0 ),
+		mType( TYPE::UNDEFINED )
 	{
 		// Each contour should ideally have its own unique color
 		mColor = ci::Color( ci::CM_HSV, ci::vec3( ci::Rand::randFloat(), 1, 1) );
 	};
 
-	Contour( int const & id, int const & parentId ) :
+	Contour( int const & id, int const & parentId, TYPE const & type ) :
 		mId( id ),
-		mParentContourId( parentId )
+		mParentContourId( parentId ),
+		mType( type )
 	{
 		// Each contour should ideally have its own unique color
 		mColor = ci::Color( ci::CM_HSV, ci::vec3( ci::Rand::randFloat(), 1, 1 ) );
-	};
-
-	enum TYPE {
-		OUTER,
-		HOLE
 	};
 
 	void addPoint( ci::ivec2 const & pos )
@@ -51,6 +54,8 @@ struct Contour {
 
 	int const mId;
 	int const mParentContourId;
+
+	TYPE const mType;
 
 	std::vector<ci::vec2> mCoords;
 

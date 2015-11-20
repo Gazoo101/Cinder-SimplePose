@@ -76,39 +76,34 @@ void CiSimplePose::detectTags( ci::Surface8uRef surface )
 	// Detect Contours
 	mContourFinder->process( mImgBinary );
 
-	// Filter contours that aren't big enough
+	// Filter contours that aren't big enough and aren't outer contours
 	auto contours = mContourFinder->getContours();
 
 	std::copy_if( contours.begin(), contours.end(), std::back_inserter( mContoursTagSized ),
-		[]( Contour const & contour ) { return contour.calcPerimeter() > 100.0f; } );
+		[]( Contour const & contour ) { return (contour.calcPerimeter() > 100.0f) && contour.mType == Contour::TYPE::OUTER; } );
 
 	// Approximate Polygons from Contours and filter polygons to retain only possible tags
 	mPolygonApproximator->process( mContoursTagSized );
 
-	// Filter polygons that are not convex
+	/***
+	* Filter Polygons
+	*/
 	auto polygons = mPolygonApproximator->getPolygons();
 
+	// Throw out non-convex poly's
 	std::copy_if( polygons.begin(), polygons.end(), std::back_inserter( mPolygonsConvex ),
 		[]( Polygon const & polygon ) { return polygon.isConvex(); } );
 
 
-	// Fix
+	// Throw out non-square poly's
 	std::copy_if( mPolygonsConvex.begin(), mPolygonsConvex.end(), std::back_inserter( mPolygonsSquare ),
 		[]( Polygon const & polygon ) { return polygon.isSquare(); } );
 
-
+	mTagRecognizer->process( mImgBinary, mPolygonsSquare );
 
 
 
 	// Todo:
-
-	// Detect squares
-	//detectSquaresInBinary( mIncomingBinarized );
-	//mTexSquares->update( *mIncomingSquaresDetected.get() );
-
-	// Detect tags within squares
-	//detectTagsInSquares( mIncomingSquaresDetected );
-	//mTexTags->update( *mIncomingTagsDetected.get() );
 
 	// Do serious math to determine its position in relation to camera
 
@@ -151,34 +146,17 @@ void CiSimplePose::drawPolygonsSquaresOnly() const
 	}
 }
 
+void CiSimplePose::drawTagsAll() const
+{
+	mTagRecognizer->drawDetectedTags();
+}
+
 ci::Channel8uRef CiSimplePose::processIncomingToGrayscale( ci::Surface8uRef surface )
 {
-	//mImgGrayScale
 	auto grayscale = ci::Channel8u::create( *surface.get() );
-
-
-
-
-
 	return grayscale;
 }
 
-void CiSimplePose::detectSquaresInBinary( ci::Surface8uRef surface )
-{
-	/*
-	How the algorithm works:
-
-	Based on: Satoshi Suzuki and Keiichi Abe, Topological Structural Analysis of Digitized Binary Images by Border Following
-	
-	
-	*/
-
-}
-
-void CiSimplePose::detectTagsInSquares( ci::Surface8uRef surface )
-{
-
-}
 
 
 void CiSimplePose::unitTest()
