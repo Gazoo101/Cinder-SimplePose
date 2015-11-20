@@ -83,13 +83,13 @@ public:
 		return ci::gl::Texture2d::create( *surface.get() );
 	}
 
-	std::bitset<BIT_PATTERN_MAX_SIZE> getRotatedBitPattern( )
+	std::bitset<BIT_PATTERN_MAX_SIZE> getRotatedBitPattern( std::bitset<BIT_PATTERN_MAX_SIZE> const & bitPattern )
 	{
 		std::bitset<BIT_PATTERN_MAX_SIZE> patternRotated;
 
 		for ( int i = 0; i < kmBitPatternDimSize; ++i ) {
 			for ( int j = 0; j < kmBitPatternDimSize; ++j ) {
-				patternRotated[( i * kmBitPatternDimSize ) + j] = mBitPattern[((kmBitPatternDimSize - j - 1) * kmBitPatternDimSize) + i];
+				patternRotated[( i * kmBitPatternDimSize ) + j] = bitPattern[( ( kmBitPatternDimSize - j - 1 ) * kmBitPatternDimSize ) + i];
 			}
 		}
 
@@ -103,31 +103,31 @@ public:
 		return mBitPattern[( y * kmBitPatternDimSize ) + x];
 	}
 
-	// Does rotating the tag 90Deg ever result in exactly the same pattern?
-	bool isSelfSymmetric() override
-	{
-		// XXX: fix
-		return false;
-	}
+	//// Does rotating the tag 90Deg ever result in exactly the same pattern?
+	//bool isSelfSymmetric() override
+	//{
+	//	// XXX: fix
+	//	return false;
+	//}
 
-	std::vector<unsigned long long> getInvalidatedTagIDs() override
-	{
-		std::vector<unsigned long long> invalidatedTagIDs;
+	//std::vector<unsigned long long> getInvalidatedTagIDs() override
+	//{
+	//	std::vector<unsigned long long> invalidatedTagIDs;
 
-		auto rotatedPattern90 = getRotatedBitPattern();
+	//	auto rotatedPattern90 = getRotatedBitPattern();
 
-		auto tag90 = TagBitPattern( kmBitPatternDimSize, rotatedPattern90.to_ulong() );
-		auto rotatedPattern180 = tag90.getRotatedBitPattern();
+	//	auto tag90 = TagBitPattern( kmBitPatternDimSize, rotatedPattern90.to_ulong() );
+	//	auto rotatedPattern180 = tag90.getRotatedBitPattern();
 
-		auto tag180 = TagBitPattern( kmBitPatternDimSize, rotatedPattern180.to_ulong() );
-		auto rotatedPattern270 = tag180.getRotatedBitPattern();
+	//	auto tag180 = TagBitPattern( kmBitPatternDimSize, rotatedPattern180.to_ulong() );
+	//	auto rotatedPattern270 = tag180.getRotatedBitPattern();
 
-		invalidatedTagIDs.emplace_back( rotatedPattern90.to_ulong() );
-		invalidatedTagIDs.emplace_back( rotatedPattern180.to_ulong() );
-		invalidatedTagIDs.emplace_back( rotatedPattern270.to_ulong() );
+	//	invalidatedTagIDs.emplace_back( rotatedPattern90.to_ulong() );
+	//	invalidatedTagIDs.emplace_back( rotatedPattern180.to_ulong() );
+	//	invalidatedTagIDs.emplace_back( rotatedPattern270.to_ulong() );
 
-		return std::move( invalidatedTagIDs );
-	}
+	//	return std::move( invalidatedTagIDs );
+	//}
 
 private:
 

@@ -19,6 +19,7 @@ class TagRecognizer;
 class AdaptiveThresholdBinarization;
 class ContourDetector;
 class PolygonApproximator;
+class PoseEstimator;
 struct Contour;
 struct Polygon;
 
@@ -26,7 +27,10 @@ class CiSimplePose {
 	
 public:
 
-	CiSimplePose( unsigned int const & incomingImagesWidth, unsigned int const & incomingImagesHeight );
+	CiSimplePose( 
+		unsigned int const & incomingImagesWidth, 
+		unsigned int const & incomingImagesHeight,
+		ci::mat3 const & intrinsicCameraParameters );
 	~CiSimplePose();
 
 	//getCameraMatrix();	- Todo. Use OpenCV for now.
@@ -83,6 +87,8 @@ private:
 	std::unique_ptr<AdaptiveThresholdBinarization> mBinarizer;
 	std::unique_ptr<ContourDetector> mContourFinder;
 	std::unique_ptr<PolygonApproximator> mPolygonApproximator;
+
+	std::unique_ptr<PoseEstimator> mPoseEstimator;
 };
 
 #endif /* SIMPLEPOSE_SIMPLEPOSE */

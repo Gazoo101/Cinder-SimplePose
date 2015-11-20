@@ -50,18 +50,18 @@ void TagBitPattern::draw() const
 
 }
 
-ci::vec2 infLineCollision( ci::vec2 line1pos1, ci::vec2 line1pos2, ci::vec2 line2pos1, ci::vec2 line2pos2 )
+ci::vec2 infLineCollision( ci::vec2 lineA1, ci::vec2 lineA2, ci::vec2 lineB1, ci::vec2 lineB2 )
 {
 	// Inspiration: http://devmag.org.za/2009/04/17/basic-collision-detection-in-2d-part-2/
 
-	float denom = ( ( line2pos2.y - line2pos1.x ) * ( line1pos2.x - line1pos1.x ) ) - ( ( line2pos2.x - line2pos1.x ) * ( line1pos2.y - line1pos1.y ) );
+	float denom = ( ( lineB2.y - lineB1.y ) * ( lineA2.x - lineA1.x ) ) - ( ( lineB2.x - lineB1.x ) * ( lineA2.y - lineA1.y ) );
 
 	if ( denom == 0 )
 	{
 		return ci::vec2( 0 );	// No collision
 	}
 
-	float ua = ( ( line2pos2.x - line2pos1.x ) * ( line1pos1.y - line2pos1.y ) - ( ( line2pos2.y - line2pos1.y ) *( line1pos1.x - line2pos1.x ) ) ) / denom;
+	float ua = ( ( ( lineB2.x - lineB1.x ) * ( lineA1.y - lineB1.y ) ) - ( ( lineB2.y - lineB1.y ) *( lineA1.x - lineB1.x ) ) ) / denom;
 
 	//// Next lines only required if lines are of finite length
 	//float ub = ( ( line1pos2.x - line1pos1.x ) * ( line1pos1.y - line2pos1.y ) - ( ( line1pos2.y - line1pos1.y ) *( line1pos1.x - line2pos1.x ) ) ) / denom;
@@ -70,7 +70,7 @@ ci::vec2 infLineCollision( ci::vec2 line1pos1, ci::vec2 line1pos2, ci::vec2 line
 	//	return ci::vec2( 0 );	// No collision
 	//}
 
-	return line1pos1 + ua * ( line1pos2 - line1pos1 );
+	return lineA1 + ua * ( lineA2 - lineA1 );
 }
 
 bool TagBitPattern::detect( ci::Channel8uRef binaryImg, Polygon const & potentialTagOutline )

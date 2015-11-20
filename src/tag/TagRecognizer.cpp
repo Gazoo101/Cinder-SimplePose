@@ -42,26 +42,26 @@ TagRecognizer::~TagRecognizer()
 
 void TagRecognizer::generateTags()
 {
-	// For now generates MAX tags
-	unsigned int tagMaxId = 2^( kmBitPatternSize*kmBitPatternSize );
+	//// For now generates MAX tags
+	//unsigned int tagMaxId = 2^( kmBitPatternSize*kmBitPatternSize );
 
-	for ( unsigned int tagId = 0; tagId < tagMaxId; ++tagId )
-	{
-		auto tag = new TagBitPattern( kmBitPatternSize, tagId );
+	//for ( unsigned int tagId = 0; tagId < tagMaxId; ++tagId )
+	//{
+	//	auto tag = new TagBitPattern( kmBitPatternSize, tagId );
 
-		// Only add if Tag is NOT self-symmetric
-		if ( !tag->isSelfSymmetric() )
-		{
-			auto rotatedDupesIds = tag->getInvalidatedTagIDs();
+	//	// Only add if Tag is NOT self-symmetric
+	//	if ( !tag->isSelfSymmetric() )
+	//	{
+	//		auto rotatedDupesIds = tag->getInvalidatedTagIDs();
 
-			for ( auto &dupeId : rotatedDupesIds )
-			{
-				mInvalidTags.push_back( dupeId );
-			}
+	//		for ( auto &dupeId : rotatedDupesIds )
+	//		{
+	//			mInvalidTags.push_back( dupeId );
+	//		}
 
-			//mRecognizedTags.emplace_back( std::move( tag ) );
-		}
-	}
+	//		//mRecognizedTags.emplace_back( std::move( tag ) );
+	//	}
+	//}
 }
 
 ci::Surface8uRef TagRecognizer::getTagTex( unsigned int const &numTags )

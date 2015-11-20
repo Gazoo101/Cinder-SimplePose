@@ -18,9 +18,14 @@
 #include "image/ContourDetector.h"
 #include "image/PolygonApproximator.h"
 
+#include "math/PoseEstimator.h"
+
 #include "image/Polygon.h"
 
-CiSimplePose::CiSimplePose( unsigned int const & incomingImagesWidth, unsigned int const & incomingImagesHeight ) :
+CiSimplePose::CiSimplePose( 
+	unsigned int const & incomingImagesWidth,
+	unsigned int const & incomingImagesHeight,
+	ci::mat3 const & intrinsicCameraParameters ) :
 	kmIncomingImgsWidth( incomingImagesWidth ),
 	kmIncomingImgsHeight( incomingImagesHeight )
 {
@@ -29,7 +34,9 @@ CiSimplePose::CiSimplePose( unsigned int const & incomingImagesWidth, unsigned i
 	mContourFinder = std::unique_ptr<ContourDetector>( new ContourDetector( incomingImagesWidth, incomingImagesHeight ) );
 	mPolygonApproximator = std::unique_ptr<PolygonApproximator>( new PolygonApproximator() );
 
-	mTagRecognizer = std::unique_ptr<TagRecognizer>( new TagRecognizer(4) );
+	mTagRecognizer = std::unique_ptr<TagRecognizer>( new TagRecognizer(3) );
+
+	mPoseEstimator = std::unique_ptr<PoseEstimator>( new PoseEstimator( intrinsicCameraParameters ) );
 
 	// Setup Detection Surfaces
 	mImgGrayScale = ci::Channel8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight );

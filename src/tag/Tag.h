@@ -58,8 +58,8 @@ private:
 	virtual ci::gl::Texture2dRef getTagAsTexture() = 0;
 
 	// Does rotating the tag 90Deg ever result in exactly the same pattern?
-	virtual bool isSelfSymmetric() = 0;
-	virtual std::vector<unsigned long long> getInvalidatedTagIDs() = 0;
+	//virtual bool isSelfSymmetric() = 0;
+	//virtual std::vector<unsigned long long> getInvalidatedTagIDs() = 0;
 
 	unsigned long long const kmId;
 };
