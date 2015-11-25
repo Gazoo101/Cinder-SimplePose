@@ -18,9 +18,6 @@ kmBitPatternSize( bitPatternSize )
 	/* Each recognizable Tag Type is added here. */
 	mRecognizedTagsTypes.emplace_back( std::unique_ptr<TagBitPattern>( new TagBitPattern( bitPatternSize ) ) );
 
-
-
-
 	if ( kmBitPatternSize > kmMaxBitPattern )
 	{
 		CI_LOG_W( "Selected bit Pattern size (" << kmBitPatternSize << ") larger than max (" << kmMaxBitPattern << "), detection disabled." );
@@ -69,10 +66,9 @@ ci::Surface8uRef TagRecognizer::getTagTex( unsigned int const &numTags )
 	return ci::Surface::create( 32, 32, true );
 }
 
-void TagRecognizer::process( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares )
+std::vector<std::unique_ptr<Tag>> TagRecognizer::process( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares )
 {
 	mDetectedTags.clear();
-
 
 	for ( auto const & knownTagType : mRecognizedTagsTypes )
 	{
@@ -85,6 +81,8 @@ void TagRecognizer::process( ci::Channel8uRef binaryImg, std::vector<Polygon> co
 
 			if ( tagDetected )
 			{
+				// detect() will have ordered and saved the corner locations of the tag upon detection!
+
 				// Blueprint is now a valid tag
 				mDetectedTags.push_back( std::unique_ptr<Tag>( tagDetectionBlueprint ) );
 
@@ -95,13 +93,7 @@ void TagRecognizer::process( ci::Channel8uRef binaryImg, std::vector<Polygon> co
 
 	}
 
-
-	//processSquaresToRecognizableTags( binaryImg, squares );
-}
-
-void TagRecognizer::processSquaresToRecognizableTags( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares )
-{
-
+	return std::move( mDetectedTags );
 }
 
 void TagRecognizer::drawDetectedTags()

@@ -16,6 +16,8 @@
 
 #include "cinder/Timer.h"	// For performance measurements/improvements only
 
+#include "tag/Tag.h"
+
 // Forward declarations
 class TagRecognizer;
 class AdaptiveThresholdBinarization;
@@ -37,7 +39,10 @@ public:
 
 	//getCameraMatrix();	- Todo. Use OpenCV for now.
 
-	void detectTags( ci::Surface8uRef surface );
+	ci::mat4 getEstimatedViewMatrixFromTag( ci::Surface8uRef surface );
+
+	void getTagPoses( ci::Surface8uRef surface, ci::mat4 viewMatrix );
+	 
 
 	inline ci::Surface8uRef getTagTex( unsigned int const &numTags );
 	
@@ -59,9 +64,13 @@ public:
 
 	void unitTest();
 
+	ci::mat4 convertIntrinsicCameraParametersToOpenGLProjectionMatrix( ci::mat3 const & intrinsicCameraParameters, float const &imgFeedWidth, float const &imgFeedHeight );
+
 	void matchVirtualCamToRealCamParameters( ci::CameraPersp camPersp );
 
 private:
+
+	std::vector<std::unique_ptr<Tag>> detectTags( ci::Surface8uRef surface );
 
 	ci::Channel8uRef processIncomingToGrayscale( ci::Surface8uRef surface );
 	void processGrayscaleToBinary( ci::Surface8uRef surface );

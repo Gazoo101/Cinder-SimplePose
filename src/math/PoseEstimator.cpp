@@ -40,7 +40,7 @@ void PoseEstimator::estimatePose( ci::vec2 const tagCornerScreenCoords[4] )
 {
 	auto estimatedViewMatrix = estimateViewMatrix( tagCornerScreenCoords );
 
-	extractPositionAndOrientationFromViewMatrix( estimatedViewMatrix );
+	//extractPositionAndOrientationFromViewMatrix( estimatedViewMatrix );
 }
 
 ci::mat4 PoseEstimator::estimateViewMatrix( ci::vec2 const tagCornerScreenCoords[4] )
@@ -91,7 +91,42 @@ ci::mat4 PoseEstimator::estimateViewMatrix( ci::vec2 const tagCornerScreenCoords
 		);
 }
 
-void PoseEstimator::extractPositionAndOrientationFromViewMatrix( ci::mat4 const & viewMatrix )
+void PoseEstimator::extractPositionAndOrientationFromViewMatrix(
+	ci::mat4 const & matViewMatrixVirtualCamera,
+	ci::mat4 const & matViewMatrixEstimatedFromTag )
 {
+	/*
+		To determine the virtual world position and orientation of one or several tags, we use a fixed
+		(virtual) camera to anchor them all to. We do this, because we want to mimic the real world
+		where a single camera observes all the individual tags.
+
+		This may sound a little odd, but the reason for this is that pose estimation currently yields
+		a view matrix from which we can extract object location/orientation.
+
+	*/
+
+
+
+
+
+	// The (estimated) ViewMatrix contains calculations that translate an observed object
+	// from world-coordinates to view-coordinates. Remember that we've defined the objects
+	// world coordinates as being centered around the point of origin (Mr. Wagner claims this
+	// leads to the most accurate estimation).
+
+	// Thus, the ViewMatrix implicitly tells us where our virtual camera is located in world
+	// coordinates. Thus, we can 
+
+
+	ci::mat4 heiy;
+
+	glm::toQuat( heiy );
+	
+
+	// The calculated viewMatrix (which describes where the camera is located in relation
+	// to the observed tag) contains the information we need. We are interested in the
+	// inverse viewMatrix, as we prefer a world where the camera is static, and the observed
+	// tag/object moves.
+
 
 }

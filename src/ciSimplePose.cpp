@@ -69,7 +69,29 @@ CiSimplePose::~CiSimplePose()
 
 ci::Surface8uRef CiSimplePose::getTagTex( unsigned int const &numTags ) { return mTagRecognizer->getTagTex( numTags ); };
 
-void CiSimplePose::detectTags( ci::Surface8uRef surface )
+ci::mat4 CiSimplePose::getEstimatedViewMatrixFromTag( ci::Surface8uRef surface )
+{
+	auto detectedTags = detectTags( surface );
+
+	auto firstDetectedTag = detectedTags.begin();
+
+	auto posCornersArray = firstDetectedTag->get()->getPosCornersScreencoords();
+
+	auto ptr = reinterpret_cast<ci::vec2 const *>( &firstDetectedTag->get()->getPosCornersScreencoords() );
+
+	return mPoseEstimator->estimateViewMatrix( ptr );
+
+	//mPoseEstimator->estimateViewMatrix( ptr );
+
+	//return ci::mat4( 0 );
+}
+
+void CiSimplePose::getTagPoses( ci::Surface8uRef surface, ci::mat4 viewMatrix )
+{
+	detectTags( surface );
+}
+
+std::vector<std::unique_ptr<Tag>> CiSimplePose::detectTags( ci::Surface8uRef surface )
 {
 	mContoursTagSized.clear();
 	mPolygonsConvex.clear();
@@ -109,15 +131,9 @@ void CiSimplePose::detectTags( ci::Surface8uRef surface )
 	std::copy_if( mPolygonsConvex.begin(), mPolygonsConvex.end(), std::back_inserter( mPolygonsSquare ),
 		[]( Polygon const & polygon ) { return polygon.isSquare(); } );
 
-	mTagRecognizer->process( mImgBinary, mPolygonsSquare );
+	auto detectedTags = mTagRecognizer->process( mImgBinary, mPolygonsSquare );
 
-
-
-	// Todo:
-
-	// Do serious math to determine its position in relation to camera
-
-	// Put the location or something in vector ready to return
+	return std::move( detectedTags );
 }
 
 void CiSimplePose::drawAllContours() const
@@ -217,4 +233,28 @@ void CiSimplePose::matchVirtualCamToRealCamParameters( ci::CameraPersp camPersp 
 
 
 	//camPersp.setPerspective();
+}
+
+ci::mat4 CiSimplePose::convertIntrinsicCameraParametersToOpenGLProjectionMatrix( 
+	ci::mat3 const & intrinsicCameraParameters, 
+	float const &imgFeedWidth, 
+	float const &imgFeedHeight )
+{
+	//float a = intrinsicCameraParameters[0][0];
+	//float b = intrinsicCameraParameters[0][1];
+	//float c = intrinsicCameraParameters[0][2];
+
+	//float hello = intrinsicCameraParameters[1][1];
+
+	//float hello2 = intrinsicCameraParameters[2][1];
+	
+	// Apparently access is [row][column], i.e. [y][x]
+	auto mat = ci::mat4(
+		2.0f * intrinsicCameraParameters[0][0] / imgFeedWidth, 0.0f, 2.0f * ( intrinsicCameraParameters[0][2] / imgFeedWidth ) - 1.0f, 0.0f,
+		0.0f, 2.0f * intrinsicCameraParameters[1][1] / imgFeedHeight, 2.0f * ( intrinsicCameraParameters[1][2] / imgFeedHeight ) - 1.0f, 0.0f,
+		0.0f, 0.0f, -1.0f, -0.02f,
+		0.0f, 0.0f, -1.0f, 0.0f
+		);
+
+	return glm::transpose( mat );
 }

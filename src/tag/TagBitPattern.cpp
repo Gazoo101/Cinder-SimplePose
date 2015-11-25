@@ -158,5 +158,16 @@ bool TagBitPattern::detect( ci::Channel8uRef binaryImg, Polygon const & potentia
 		}
 	}
 
+	// Todo: If the bit pattern is symmetrical or otherwise not unique, the detection should fail.
+
+	// Detection success!
+
+	// Todo: Decode bit-pattern!
+
+	mPosCorners[0] = pos1;
+	mPosCorners[1] = pos2;
+	mPosCorners[2] = pos3;
+	mPosCorners[3] = pos4;
+
 	return true;
 }

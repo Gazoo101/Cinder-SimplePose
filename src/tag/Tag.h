@@ -46,6 +46,8 @@ public:
 	virtual Tag * clone() = 0;
 	virtual bool detect( ci::Channel8uRef binaryImg, Polygon const & potentialTagOutline ) = 0;
 
+	std::array<ci::vec2, 4> const getPosCornersScreencoords() const { return mPosCorners; };
+
 	//// Move Operators!
 	//Tag( Tag&& other ) :
 	//	kmId( other.kmId )
@@ -53,9 +55,11 @@ public:
 	//}
 	//Tag& operator=( Tag&& ) { return *this; }
 
-private:
+protected:
 
 	virtual ci::gl::Texture2dRef getTagAsTexture() = 0;
+
+	std::array<ci::vec2, 4> mPosCorners;
 
 	// Does rotating the tag 90Deg ever result in exactly the same pattern?
 	//virtual bool isSelfSymmetric() = 0;

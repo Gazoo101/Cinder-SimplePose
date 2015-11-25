@@ -21,10 +21,13 @@ public:
 
 	void estimatePose( ci::vec2 const tagCornerScreenCoords[4] );
 
-private:
 
 	ci::mat4 estimateViewMatrix( ci::vec2 const tagCornerScreenCoords[4] );
-	void extractPositionAndOrientationFromViewMatrix( ci::mat4 const & viewMatrix );
+
+private:
+	void extractPositionAndOrientationFromViewMatrix(
+		ci::mat4 const & matViewMatrixVirtualCamera,
+		ci::mat4 const & matViewMatrixEstimatedFromTag );
 
 	std::array<ci::vec2, 4> mTagVirtualCoords;
 
