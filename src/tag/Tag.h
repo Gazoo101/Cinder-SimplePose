@@ -35,6 +35,52 @@ public:
 
 	}
 
+	Tag( bool fakery, int debugInt ) :
+		kmId( 0 )
+	{
+		// Currently in clock-wise order... Why?
+		//mPosCorners[0] = ci::vec2( 213, 151 );
+		//mPosCorners[1] = ci::vec2( 354, 175 );
+		//mPosCorners[2] = ci::vec2( 335, 300 );
+		//mPosCorners[3] = ci::vec2( 171, 270 );
+
+		// Change to Counter clock-wise - should be same order as the virtual points we've designated
+		switch (debugInt)
+		{
+		case 0:
+
+			mPosCorners[0] = ci::vec2(300, 300);
+			mPosCorners[1] = ci::vec2(300, 100);
+			mPosCorners[2] = ci::vec2(100, 100);
+			mPosCorners[3] = ci::vec2(100, 300);
+
+			break;
+		case 1:
+
+			mPosCorners[0] = ci::vec2(400, 400);
+			mPosCorners[1] = ci::vec2(400, 200);
+			mPosCorners[2] = ci::vec2(200, 200);
+			mPosCorners[3] = ci::vec2(200, 400);
+
+			break;
+		case 2:
+
+			//mPosCorners[0] = ci::vec2(213, 151);
+			//mPosCorners[1] = ci::vec2(171, 270);
+			//mPosCorners[2] = ci::vec2(335, 300);
+			//mPosCorners[3] = ci::vec2(354, 175);
+
+			mPosCorners[0] = ci::vec2(335, 300);
+			mPosCorners[1] = ci::vec2(354, 175);
+			mPosCorners[2] = ci::vec2(213, 151);
+			mPosCorners[3] = ci::vec2(171, 270);
+
+			break;
+		}
+
+		
+	}
+
 	enum class STATE : unsigned char
 	{
 		NOT_RECOGNIZED,

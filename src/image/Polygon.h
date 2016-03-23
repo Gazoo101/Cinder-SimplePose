@@ -6,8 +6,8 @@
 * All other rights reserved.
 */
 
-#ifndef SIMPLEPOSE_POLYGON
-#define SIMPLEPOSE_POLYGON
+#ifndef SIMPLEPOSE_POLYGON_H_INCLUDED
+#define SIMPLEPOSE_POLYGON_H_INCLUDED
 
 #include <vector>
 
@@ -39,4 +39,4 @@ struct Polygon {
 	ci::PolyLine2 mPolyLine;
 };
 
-#endif /* SIMPLEPOSE_POLYGON */
+#endif /* SIMPLEPOSE_POLYGON_H_INCLUDED */

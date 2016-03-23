@@ -6,6 +6,9 @@
 * All other rights reserved.
 */
 
+#ifndef SIMPLEPOSE_POSEESTIMATOR_H_INCLUDED
+#define SIMPLEPOSE_POSEESTIMATOR_H_INCLUDED
+
 #include "cinder/Matrix.h"
 #include <array>
 
@@ -21,10 +24,9 @@ public:
 
 	void estimatePose( ci::vec2 const tagCornerScreenCoords[4] );
 
-
 	ci::mat4 estimateViewMatrix( ci::vec2 const tagCornerScreenCoords[4] );
 
-private:
+protected:
 	void extractPositionAndOrientationFromViewMatrix(
 		ci::mat4 const & matViewMatrixVirtualCamera,
 		ci::mat4 const & matViewMatrixEstimatedFromTag );
@@ -39,7 +41,7 @@ private:
 	ci::mat3 mMatIntrinsicCameraParameters;
 	ci::mat3 mMatIntrinsicCameraParametersInverse;
 
-
 	std::unique_ptr<Homography> mHomographyCalculator;
-
 };
+
+#endif /* SIMPLEPOSE_POSEESTIMATOR_H_INCLUDED */

@@ -6,13 +6,12 @@
 * All other rights reserved.
 */
 
-#ifndef SIMPLEPOSE_SIMPLEPOSE
-#define SIMPLEPOSE_SIMPLEPOSE
+#ifndef SIMPLEPOSE_CISIMPLEPOSE_H_INCLUDED
+#define SIMPLEPOSE_CISIMPLEPOSE_H_INCLUDED
 
 #include "cinder/Surface.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/Camera.h"
-
 
 #include "cinder/Timer.h"	// For performance measurements/improvements only
 
@@ -39,7 +38,13 @@ public:
 
 	//getCameraMatrix();	- Todo. Use OpenCV for now.
 
-	ci::mat4 getEstimatedViewMatrixFromTag( ci::Surface8uRef surface );
+	ci::mat4 getEstimatedViewMatrixFromTag( ci::Surface8uRef surface, unsigned char const & debugTagNr );
+	ci::mat4 getEstimatedViewMatrixFromTagOpenCVOld(ci::Surface8uRef surface, unsigned char const & debugTagNr);
+	ci::mat4 getEstimatedViewMatrixFromTagOpenCVNew(ci::Surface8uRef surface, unsigned char const & debugTagNr);
+
+	ci::mat4 getEstimatedViewMatrixFromTagPoints( ci::vec2 const& pt1, ci::vec2 const& pt2, ci::vec2 const& pt3, ci::vec2 const& pt4 );
+	ci::mat4 getEstimatedViewMatrixFromTagPointsOpenCVOld( ci::vec2 const& pt1, ci::vec2 const& pt2, ci::vec2 const& pt3, ci::vec2 const& pt4 );
+	ci::mat4 getEstimatedViewMatrixFromTagPointsOpenCVNew( ci::vec2 const& pt1, ci::vec2 const& pt2, ci::vec2 const& pt3, ci::vec2 const& pt4 );
 
 	void getTagPoses( ci::Surface8uRef surface, ci::mat4 viewMatrix );
 	 
@@ -68,7 +73,7 @@ public:
 
 	void matchVirtualCamToRealCamParameters( ci::CameraPersp camPersp );
 
-private:
+protected:
 
 	std::vector<std::unique_ptr<Tag>> detectTags( ci::Surface8uRef surface );
 
@@ -106,4 +111,4 @@ private:
 	std::unique_ptr<PoseEstimator> mPoseEstimator;
 };
 
-#endif /* SIMPLEPOSE_SIMPLEPOSE */
+#endif /* SIMPLEPOSE_CISIMPLEPOSE_H_INCLUDED */

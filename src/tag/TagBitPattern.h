@@ -20,6 +20,15 @@ class TagBitPattern : public Tag
 {
 public:
 
+	// Fake remove soon
+	TagBitPattern( bool fakery, unsigned int const &debugInt ) :
+		Tag(fakery, debugInt),
+		mBitPatternValue( 0 ),
+		kmBitPatternDimSize( 4 )
+	{
+
+	}
+
 	TagBitPattern( unsigned short const &bitPatternDimSize ) :
 		Tag(),
 		mBitPatternValue( 0 ),

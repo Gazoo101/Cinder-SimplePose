@@ -6,8 +6,8 @@
 * All other rights reserved.
 */
 
-#ifndef SIMPLEPOSE_POLYGONAPPROXIMATOR
-#define SIMPLEPOSE_POLYGONAPPROXIMATOR
+#ifndef SIMPLEPOSE_POLYGONAPPROXIMATOR_H_INCLUDED
+#define SIMPLEPOSE_POLYGONAPPROXIMATOR_H_INCLUDED
 
 #include <vector>
 #include "cinder/PolyLine.h"
@@ -44,4 +44,4 @@ private:
 	ci::PolyLine2f mTestPoly2, mTestPoly2Reduced;
 };
 
-#endif /* SIMPLEPOSE_POLYGONAPPROXIMATOR */
+#endif /* SIMPLEPOSE_POLYGONAPPROXIMATOR_H_INCLUDED */

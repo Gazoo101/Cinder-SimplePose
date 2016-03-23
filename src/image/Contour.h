@@ -6,8 +6,8 @@
 * All other rights reserved.
 */
 
-#ifndef SIMPLEPOSE_CONTOUR
-#define SIMPLEPOSE_CONTOUR
+#ifndef SIMPLEPOSE_CONTOUR_H_INCLUDED
+#define SIMPLEPOSE_CONTOUR_H_INCLUDED
 
 #include <list>
 #include "cinder/Color.h"
@@ -68,4 +68,4 @@ struct Contour {
 
 };
 
-#endif /* SIMPLEPOSE_CONTOUR */
+#endif /* SIMPLEPOSE_CONTOUR_H_INCLUDED */

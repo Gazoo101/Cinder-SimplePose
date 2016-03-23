@@ -6,8 +6,8 @@
 * All other rights reserved.
 */
 
-#ifndef SIMPLEPOSE_CONTOUR_DETECTOR
-#define SIMPLEPOSE_CONTOUR_DETECTOR
+#ifndef SIMPLEPOSE_CONTOURDETECTOR_H_INCLUDED
+#define SIMPLEPOSE_CONTOURDETECTOR_H_INCLUDED
 
 #include "cinder/Surface.h"
 #include "Contour.h"	// Required due to enum
@@ -56,4 +56,4 @@ private:
 	unsigned int const kmImgBorderedWidth, kmImgBorderedHeight;
 };
 
-#endif /* SIMPLEPOSE_CONTOUR_DETECTOR */
+#endif /* SIMPLEPOSE_CONTOURDETECTOR_H_INCLUDED */

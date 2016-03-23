@@ -12,8 +12,8 @@
 	pixel iteration is supporte. No love fof 4-way for now I'm afraid.
 */
 
-#ifndef SIMPLEPOSE_CONTOUR_MAP
-#define SIMPLEPOSE_CONTOUR_MAP
+#ifndef SIMPLEPOSE_CONTOURMAP_H_INCLUDED
+#define SIMPLEPOSE_CONTOURMAP_H_INCLUDED
 
 #include <memory>
 #include <array>
@@ -246,4 +246,4 @@ public:
 	friend class NBIter;
 };
 
-#endif /* SIMPLEPOSE_CONTOUR_MAP */
+#endif /* SIMPLEPOSE_CONTOURMAP_H_INCLUDED */

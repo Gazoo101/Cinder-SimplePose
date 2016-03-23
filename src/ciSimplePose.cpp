@@ -22,7 +22,7 @@
 
 #include "image/Polygon.h"
 
-#include "cinder/Camera.h"
+#include "tag/TagBitPattern.h"
 
 CiSimplePose::CiSimplePose( 
 	unsigned int const & incomingImagesWidth,
@@ -33,13 +33,12 @@ CiSimplePose::CiSimplePose(
 	mMatIntrinsicCameraParameters( matIntrinsicCameraParameters )
 {
 	// Raii principles
-	mBinarizer = std::unique_ptr<AdaptiveThresholdBinarization>( new AdaptiveThresholdBinarization( incomingImagesWidth, incomingImagesHeight ) );
-	mContourFinder = std::unique_ptr<ContourDetector>( new ContourDetector( incomingImagesWidth, incomingImagesHeight ) );
-	mPolygonApproximator = std::unique_ptr<PolygonApproximator>( new PolygonApproximator() );
+	mBinarizer = std::make_unique<AdaptiveThresholdBinarization>( incomingImagesWidth, incomingImagesHeight );
+	mContourFinder = std::make_unique<ContourDetector>( incomingImagesWidth, incomingImagesHeight );
+	mPolygonApproximator = std::make_unique<PolygonApproximator>();
 
-	mTagRecognizer = std::unique_ptr<TagRecognizer>( new TagRecognizer(3) );
-
-	mPoseEstimator = std::unique_ptr<PoseEstimator>( new PoseEstimator( matIntrinsicCameraParameters ) );
+	mTagRecognizer = std::make_unique<TagRecognizer>( 3 );
+	mPoseEstimator = std::make_unique<PoseEstimator>( mMatIntrinsicCameraParameters );
 
 	// Setup Detection Surfaces
 	mImgGrayScale = ci::Channel8u::create( kmIncomingImgsWidth, kmIncomingImgsHeight );
@@ -69,21 +68,44 @@ CiSimplePose::~CiSimplePose()
 
 ci::Surface8uRef CiSimplePose::getTagTex( unsigned int const &numTags ) { return mTagRecognizer->getTagTex( numTags ); };
 
-ci::mat4 CiSimplePose::getEstimatedViewMatrixFromTag( ci::Surface8uRef surface )
+ci::mat4 CiSimplePose::getEstimatedViewMatrixFromTag( ci::Surface8uRef surface, unsigned char const & debugTagNr )
 {
-	auto detectedTags = detectTags( surface );
+	std::vector<std::unique_ptr<Tag>> tempVec;
 
-	auto firstDetectedTag = detectedTags.begin();
+	tempVec.emplace_back(std::move(std::unique_ptr<Tag>(new TagBitPattern(true, debugTagNr))));
 
-	auto posCornersArray = firstDetectedTag->get()->getPosCornersScreencoords();
-
-	auto ptr = reinterpret_cast<ci::vec2 const *>( &firstDetectedTag->get()->getPosCornersScreencoords() );
-
+	auto posCornersArray = tempVec.begin()->get()->getPosCornersScreencoords();
+	auto ptr = reinterpret_cast<ci::vec2 const *>( &tempVec.begin()->get()->getPosCornersScreencoords() );
 	return mPoseEstimator->estimateViewMatrix( ptr );
 
-	//mPoseEstimator->estimateViewMatrix( ptr );
+	//auto detectedTags = detectTags( surface );
 
-	//return ci::mat4( 0 );
+	//if ( !detectedTags.empty() )
+	//{
+	//	auto firstDetectedTag = detectedTags.begin();
+
+	//	auto posCornersArray = firstDetectedTag->get()->getPosCornersScreencoords();
+
+	//	auto ptr = reinterpret_cast<ci::vec2 const *>( &firstDetectedTag->get()->getPosCornersScreencoords() );
+
+	//	return mPoseEstimator->estimateViewMatrix( ptr );
+	//}
+	//else {
+	//	return ci::mat4( 0 );
+	//}
+}
+
+ci::mat4 CiSimplePose::getEstimatedViewMatrixFromTagPoints( ci::vec2 const& pt1, ci::vec2 const& pt2, ci::vec2 const& pt3, ci::vec2 const& pt4 )
+{
+	// Recast to std::array...
+	std::array<ci::vec2, 4> ptsArray;
+	ptsArray[0] = pt1;
+	ptsArray[1] = pt2;
+	ptsArray[2] = pt3;
+	ptsArray[3] = pt4;
+
+	auto ptr = reinterpret_cast<ci::vec2 const *>( &ptsArray );
+	return mPoseEstimator->estimateViewMatrix( ptr );
 }
 
 void CiSimplePose::getTagPoses( ci::Surface8uRef surface, ci::mat4 viewMatrix )
@@ -112,7 +134,7 @@ std::vector<std::unique_ptr<Tag>> CiSimplePose::detectTags( ci::Surface8uRef sur
 	auto contours = mContourFinder->getContours();
 
 	std::copy_if( contours.begin(), contours.end(), std::back_inserter( mContoursTagSized ),
-		[]( Contour const & contour ) { return (contour.calcPerimeter() > 100.0f) && contour.mType == Contour::TYPE::OUTER; } );
+		[]( Contour const & contour ) { return ( contour.calcPerimeter() > 100.0f ); } ); // && contour.mType == Contour::TYPE::OUTER;
 
 	// Approximate Polygons from Contours and filter polygons to retain only possible tags
 	mPolygonApproximator->process( mContoursTagSized );
@@ -191,35 +213,6 @@ void CiSimplePose::unitTest()
 
 	mPolygonApproximator->testSimplification();
 }
-
-//void AR2::calcOpenGLCameraProjMatrix() {
-//	// The implementation as explained for the POSIT in OpenCV
-//	double *intrinsicData = mIntrinsicCameraMat->data.db;
-//
-//	// Row 0
-//	mCameraProjMatrix[0][0] = 2.0 * intrinsicData[0] / mImgFeedWidth;
-//	mCameraProjMatrix[0][1] = 0.0;
-//	mCameraProjMatrix[0][2] = 2.0 * ( intrinsicData[2] / mImgFeedWidth ) - 1.0;
-//	mCameraProjMatrix[0][3] = 0.0;
-//
-//	// Row 1
-//	mCameraProjMatrix[1][0] = 0.0;
-//	mCameraProjMatrix[1][1] = 2.0 * intrinsicData[4] / mImgFeedHeight;
-//	mCameraProjMatrix[1][2] = 2.0 * ( intrinsicData[5] / mImgFeedHeight ) - 1.0;
-//	mCameraProjMatrix[1][3] = 0.0;
-//
-//	// Row 2 (Clipping Plane)
-//	mCameraProjMatrix[2][0] = 0.0;
-//	mCameraProjMatrix[2][1] = 0.0;
-//	mCameraProjMatrix[2][2] = -1.0;
-//	mCameraProjMatrix[2][3] = -0.02;
-//
-//	// Row 3 | Per-definition as follows:
-//	mCameraProjMatrix[3][0] = 0.0;
-//	mCameraProjMatrix[3][1] = 0.0;
-//	mCameraProjMatrix[3][2] = -1.0;
-//	mCameraProjMatrix[3][3] = 0.0;
-//}
 
 void CiSimplePose::matchVirtualCamToRealCamParameters( ci::CameraPersp camPersp )
 {
