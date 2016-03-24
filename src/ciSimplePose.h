@@ -26,6 +26,8 @@ class PoseEstimator;
 struct Contour;
 struct Polygon;
 
+//typedef cinder::signals::Signal<bool( GestureEvent& ), cinder::signals::CollectorWhile0<bool> >		SignalGestureEvent;
+
 class CiSimplePose {
 	
 public:
@@ -109,6 +111,12 @@ protected:
 	std::unique_ptr<PolygonApproximator> mPolygonApproximator;
 
 	std::unique_ptr<PoseEstimator> mPoseEstimator;
+
+	// AR Callback
+	//ci::signals
+
+
+	//std::map<std::type_index, std::shared_ptr<EventCallbackFnBase>> mEventCallbacks;
 };
 
 #endif /* SIMPLEPOSE_CISIMPLEPOSE_H_INCLUDED */

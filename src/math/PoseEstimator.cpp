@@ -60,7 +60,6 @@ ci::mat4 PoseEstimator::estimateViewMatrix( ci::vec2 const tagCornerScreenCoords
 	// homography = mat3x3
 	auto homography = mHomographyCalculator->getHomography( mTagVirtualCoords.data(), tagCornerScreenCoords );
 
-
 	CI_LOG_I( "Our Estimation" );
 	CI_LOG_I( homography );
 
@@ -97,7 +96,6 @@ ci::mat4 PoseEstimator::estimateViewMatrix( ci::vec2 const tagCornerScreenCoords
 	CI_LOG_I( transVec );
 
 	// Long long ago, Daniel Wagner Suggested the following operations to achieve the proper transform!
-	// We also "negate" in this operation since a view matrix expects the translation to be negative.
 	auto r1length = ci::length( rotVec1 );
 	auto r2length = ci::length( rotVec2 );
 	double transAvrg = ( r1length + r2length ) / 2;
@@ -107,9 +105,6 @@ ci::mat4 PoseEstimator::estimateViewMatrix( ci::vec2 const tagCornerScreenCoords
 
 	// Ensure orthogonality - Is this needed? - On first look, yes due to difference in vector lengths...?
 	rotVec1 = glm::cross( rotVec2, rotVec3 );
-
-	//ci::mat3 transVecScaler = ci::mat3( -transAvrg );
-	//transVec = transVec / transVecScaler;
 
 	transVec.x /= transAvrg;
 	transVec.y /= transAvrg;
@@ -138,28 +133,13 @@ ci::mat4 PoseEstimator::estimateViewMatrix( ci::vec2 const tagCornerScreenCoords
 		0, 0, 0, 1
 	};
 
-	CI_LOG_I( "viewMatrix" );
-	CI_LOG_I( viewMatrix );
+	//CI_LOG_I( "viewMatrix" );
+	//CI_LOG_I( viewMatrix );
 
 	viewMatrix = leftToRightHandedCoordSystem * viewMatrix;
 
-	CI_LOG_I( "viewMatrix" );
-	CI_LOG_I( viewMatrix );
-
-	//cv::Matx44d cvToGl;// = cv::Mat::zeros( 4, 4 );
-	//cvToGl( 0, 0 ) = 1.0f;
-	//cvToGl( 1, 1 ) = -1.0f; // Invert the y axis
-	//cvToGl( 2, 2 ) = -1.0f; // invert the z axis
-	//cvToGl( 3, 3 ) = 1.0f;
-
-	//auto viewMat = ci::mat4(
-	//	0, 1, 0, transVec.x,
-	//	-1, 0, 0, transVec.y,
-	//	0, 0, 1, transVec.z,
-	//	0, 0, 0, 1
-	//	);
-
-	
+	//CI_LOG_I( "viewMatrix" );
+	//CI_LOG_I( viewMatrix );
 
 	return viewMatrix;
 }
