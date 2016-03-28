@@ -12,6 +12,8 @@
 #include "cinder/gl/wrapper.h"
 #include "cinder/gl/draw.h"
 
+namespace SimplePose {
+
 void TagBitPattern::draw() const
 {
 	// XXX: We use cinders draw functions to achieve our intended points. This is ok for now,
@@ -73,7 +75,7 @@ ci::vec2 infLineCollision( ci::vec2 lineA1, ci::vec2 lineA2, ci::vec2 lineB1, ci
 	return lineA1 + ua * ( lineA2 - lineA1 );
 }
 
-bool TagBitPattern::detect( ci::Channel8uRef binaryImg, Polygon const & potentialTagOutline )
+bool TagBitPattern::detect( ci::Channel8uRef const& binaryImg, Polygon const & potentialTagOutline )
 {
 	/*
 	At this stage, each given polygon is known/expected to have exactly 5 positions/vertices.
@@ -171,3 +173,15 @@ bool TagBitPattern::detect( ci::Channel8uRef binaryImg, Polygon const & potentia
 
 	return true;
 }
+
+Tag * TagBitPattern::cloneIfDetected( ci::Channel8uRef const& binaryImg, Polygon const & potentialTagOutline )
+{
+	if ( detect( binaryImg, potentialTagOutline ) )
+	{
+		return new TagBitPattern( *this );
+	}
+
+	return nullptr;
+}
+
+};

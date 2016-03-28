@@ -10,6 +10,8 @@
 #include "cinder/gl/draw.h"
 #include "cinder/gl/wrapper.h"
 
+namespace SimplePose {
+
 void Contour::draw() const
 {
 	ci::gl::color( mColor );
@@ -39,3 +41,5 @@ float const Contour::calcPerimeter() const
 
 	return perimeter;
 }
+
+};

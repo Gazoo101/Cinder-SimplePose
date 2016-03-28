@@ -12,6 +12,8 @@
 #include <vector>
 #include "cinder/PolyLine.h"
 
+namespace SimplePose {
+
 // Forward Declarations
 struct Contour;
 struct Polygon;
@@ -42,6 +44,8 @@ private:
 
 	ci::PolyLine2f mTestPoly1, mTestPoly1Reduced;
 	ci::PolyLine2f mTestPoly2, mTestPoly2Reduced;
+};
+
 };
 
 #endif /* SIMPLEPOSE_POLYGONAPPROXIMATOR_H_INCLUDED */

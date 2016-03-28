@@ -14,6 +14,8 @@
 #include "cinder/Color.h"
 #include "cinder/PolyLine.h"
 
+namespace SimplePose {
+
 struct Polygon {
 
 	Polygon();
@@ -37,6 +39,8 @@ struct Polygon {
 	// For rendering purposes
 	ci::Color mColor;
 	ci::PolyLine2 mPolyLine;
+};
+
 };
 
 #endif /* SIMPLEPOSE_POLYGON_H_INCLUDED */

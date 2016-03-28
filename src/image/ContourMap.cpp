@@ -11,6 +11,8 @@
 #include "cinder/Log.h"
 #include <sstream>
 
+namespace SimplePose {
+
 ContourMap::ContourMap( unsigned int const & width, unsigned int const & height ) :
 	kmWidth( width ),
 	kmHeight( height ),
@@ -177,3 +179,5 @@ void ContourMap::createOuterFrame()
 		mData.get()[( i * kmWidth ) + kmWidth - 1] = 1;	// Right Column
 	}
 }
+
+};

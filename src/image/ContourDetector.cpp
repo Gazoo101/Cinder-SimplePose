@@ -17,7 +17,9 @@
 #include "cinder/gl/draw.h"	// temp
 #include "cinder/gl/wrapper.h"
 
-ContourDetector::ContourDetector(unsigned int const & incomingImagesWidth, unsigned int const & incomingImagesHeight) :
+namespace SimplePose {
+
+ContourDetector::ContourDetector(unsigned int incomingImagesWidth, unsigned int incomingImagesHeight) :
 	kmIncomingImgsWidth( incomingImagesWidth ),
 	kmIncomingImgsHeight( incomingImagesHeight ),
 	kmImgBorderedWidth( incomingImagesWidth + 2 ),
@@ -35,7 +37,7 @@ ContourDetector::~ContourDetector()
 
 }
 
-void ContourDetector::process( ci::Channel8uRef surface )
+void ContourDetector::process( ci::Channel8uRef const& surface )
 {
 	// Set binary-based 255 channel as new contourmap
 	mContourMap->update( surface );
@@ -220,3 +222,5 @@ void ContourDetector::testContourCalculation()
 	mContourMap.reset();
 	mContourMap = std::unique_ptr<ContourMap>( new ContourMap( kmImgBorderedWidth, kmImgBorderedHeight ) );
 }
+
+};

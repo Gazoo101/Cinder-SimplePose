@@ -18,6 +18,8 @@
 #include "cinder/gl/draw.h"
 #include "cinder/gl/wrapper.h"
 
+namespace SimplePose {
+
 PolygonApproximator::PolygonApproximator()
 {
 
@@ -182,3 +184,5 @@ void PolygonApproximator::drawTestPolys()
 	ci::gl::color( ci::Color( "purple" ) );
 	ci::gl::draw( mTestPoly2Reduced );
 }
+
+};

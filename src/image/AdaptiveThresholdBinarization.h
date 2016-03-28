@@ -12,6 +12,8 @@
 #include <memory>
 #include "cinder/Surface.h"
 
+namespace SimplePose {
+
 class AdaptiveThresholdBinarization {
 
 public:
@@ -37,6 +39,8 @@ private:
 
 	ci::Channel8uRef mImageProcessed;
 	unsigned int const kmIncomingImgsWidth, kmIncomingImgsHeight;
+
+};
 
 };
 

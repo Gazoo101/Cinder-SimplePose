@@ -12,13 +12,17 @@
 #include "cinder/Vector.h"
 #include "cinder/Matrix.h"
 
-class Homography {
+namespace SimplePose {
 
-public:
+	class Homography {
 
-	ci::mat4 getPerspectiveTransform( const ci::vec2 src[4], const ci::vec2 dst[4] ) const;
-	ci::mat3 getHomography( const ci::vec2 src[4], const ci::vec2 dst[4] ) const;
-	void gaussianElimination( float *a, int n ) const;
+	public:
+
+		ci::mat4 getPerspectiveTransform( const ci::vec2 src[4], const ci::vec2 dst[4] ) const;
+		ci::mat3 getHomography( const ci::vec2 src[4], const ci::vec2 dst[4] ) const;
+		void gaussianElimination( float *a, int n ) const;
+	};
+
 };
 
 #endif /* SIMPLEPOSE_HOMOGRAPHY_H_INCLUDED */

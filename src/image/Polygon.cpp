@@ -21,6 +21,8 @@ inline bool sameSign( float a, float b ) {
 	return a*b >= 0.0f;
 }
 
+namespace SimplePose {
+
 Polygon::Polygon()
 {
 	mColor = ci::Color( ci::CM_HSV, ci::vec3( ci::Rand::randFloat(), 1, 1 ) );
@@ -119,3 +121,5 @@ float Polygon::getContainedArea() const
 
 	return area;
 }
+
+};

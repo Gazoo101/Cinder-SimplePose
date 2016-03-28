@@ -14,6 +14,8 @@
 #include "cinder/Rand.h"
 #include "cinder/PolyLine.h"
 
+namespace SimplePose {
+
 struct Contour {
 
 	enum class TYPE : unsigned char {
@@ -65,6 +67,8 @@ struct Contour {
 	// For rendering purposes
 	ci::Color mColor;
 	ci::PolyLine2 mPolyLine;
+
+};
 
 };
 

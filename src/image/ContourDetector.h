@@ -15,14 +15,16 @@
 
 #include "cinder/PolyLine.h"
 
+namespace SimplePose {
+
 class ContourDetector {
 
 public:
 
-	ContourDetector( unsigned int const & incomingImagesWidth, unsigned int const & incomingImagesHeight );
+	ContourDetector( unsigned int incomingImagesWidth, unsigned int incomingImagesHeight );
 	~ContourDetector();
 
-	void process( ci::Channel8uRef surface );
+	void process( ci::Channel8uRef const& surface );
 
 	ci::Channel8uRef getDebugImg() { return mImageDebug; };
 
@@ -32,7 +34,7 @@ public:
 
 	std::vector<Contour> const & getContours() const { return mContours; }
 
-private:
+protected:
 
 	void detectContours();
 	Contour annotateContour( ci::ivec2 const &pos, Contour::TYPE const & borderType, ContourMap::NeighborDirectionCW const & startingDirCW );
@@ -54,6 +56,8 @@ private:
 
 	unsigned int const kmIncomingImgsWidth, kmIncomingImgsHeight;
 	unsigned int const kmImgBorderedWidth, kmImgBorderedHeight;
+};
+
 };
 
 #endif /* SIMPLEPOSE_CONTOURDETECTOR_H_INCLUDED */

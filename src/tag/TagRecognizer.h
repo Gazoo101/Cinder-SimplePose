@@ -17,36 +17,37 @@ TagRecognizer takes care of knowing what sized tags we can recognize (bit patter
 
 #include "cinder/Surface.h"
 
-class Tag;
-struct Polygon;
+namespace SimplePose {
 
-class TagRecognizer {
+	class Tag;
+	struct Polygon;
 
-public:
+	class TagRecognizer {
 
-	TagRecognizer( unsigned short const &bitPatternSize );
-	~TagRecognizer();
+	public:
 
-	std::vector<std::unique_ptr<Tag>> process( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares );
+		TagRecognizer( );
+		~TagRecognizer();
 
-	ci::Surface8uRef getTagTex( unsigned int const &numTags );
+		std::vector<std::unique_ptr<Tag>> process( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares );
 
-	void drawDetectedTags();
+		void addTagType( std::unique_ptr<Tag> tagDetector );
 
-private:
+		ci::Surface8uRef getTagTex( unsigned int const &numTags );
 
-	void generateTags();
+		void drawDetectedTags();
 
-	std::vector<std::unique_ptr<Tag>> mRecognizedTagsTypes;
-	std::vector<std::unique_ptr<Tag>> mDetectedTags;
+	private:
 
-	//std::vector<Tag> mRecognizedTags;
-	std::vector<unsigned long long> mInvalidTags;
+		void generateTags();
 
-	unsigned short const kmBitPatternSize;
+		std::vector<std::unique_ptr<Tag>> mRecognizedTagsTypes;
+		//std::vector<std::unique_ptr<Tag>> mDetectedTags;
 
-	static unsigned short const kmMaxBitPattern = 6;
-	static unsigned short const kmMinBitPattern = 2;
+		//std::vector<Tag> mRecognizedTags;
+		std::vector<unsigned long long> mInvalidTags;
+
+	};
 
 };
 

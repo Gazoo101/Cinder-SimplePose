@@ -8,6 +8,8 @@
 
 #include "AdaptiveThresholdBinarization.h"
 
+namespace SimplePose {
+
 AdaptiveThresholdBinarization::AdaptiveThresholdBinarization(unsigned int const & incomingImagesWidth, unsigned int const & incomingImagesHeight) :
 	kmIncomingImgsWidth( incomingImagesWidth ),
 	kmIncomingImgsHeight( incomingImagesHeight ),
@@ -91,3 +93,5 @@ ci::Channel8uRef AdaptiveThresholdBinarization::process( ci::Channel8uRef surfac
 
 	return mImageProcessed;
 }
+
+};

@@ -20,6 +20,8 @@
 #include "cinder/Vector.h"
 #include "cinder/Channel.h"
 
+namespace SimplePose {
+
 class ContourMap {
 
 public:
@@ -244,6 +246,8 @@ public:
 	//ConstIterNeighborhood	getCCWNBIter( ci::ivec2 const &pos ) const { return ConstIterNeighborhood( mData, pos ); }
 
 	friend class NBIter;
+};
+
 };
 
 #endif /* SIMPLEPOSE_CONTOURMAP_H_INCLUDED */

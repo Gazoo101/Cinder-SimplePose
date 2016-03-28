@@ -7,99 +7,85 @@
 */
 
 #include "TagRecognizer.h"
-#include "TagBitPattern.h"
 #include "cinder/Log.h"
 
+#include "tag/Tag.h"
 #include "image/Polygon.h"
 
-TagRecognizer::TagRecognizer( unsigned short const &bitPatternSize ) :
-kmBitPatternSize( bitPatternSize )
-{
-	/* Each recognizable Tag Type is added here. */
-	mRecognizedTagsTypes.emplace_back( std::unique_ptr<TagBitPattern>( new TagBitPattern( bitPatternSize ) ) );
+namespace SimplePose {
 
-	if ( kmBitPatternSize > kmMaxBitPattern )
+	TagRecognizer::TagRecognizer( )
 	{
-		CI_LOG_W( "Selected bit Pattern size (" << kmBitPatternSize << ") larger than max (" << kmMaxBitPattern << "), detection disabled." );
-		return;
-	}
-	else if ( kmBitPatternSize < kmMinBitPattern )
-	{
-		CI_LOG_W( "Selected bit Pattern size (" << kmBitPatternSize << ") smaller than min (" << kmMinBitPattern << "), detection disabled." );
-		return;
+
+		//generateTags();
 	}
 
-	generateTags();
-}
-
-TagRecognizer::~TagRecognizer()
-{
-
-}
-
-void TagRecognizer::generateTags()
-{
-	//// For now generates MAX tags
-	//unsigned int tagMaxId = 2^( kmBitPatternSize*kmBitPatternSize );
-
-	//for ( unsigned int tagId = 0; tagId < tagMaxId; ++tagId )
-	//{
-	//	auto tag = new TagBitPattern( kmBitPatternSize, tagId );
-
-	//	// Only add if Tag is NOT self-symmetric
-	//	if ( !tag->isSelfSymmetric() )
-	//	{
-	//		auto rotatedDupesIds = tag->getInvalidatedTagIDs();
-
-	//		for ( auto &dupeId : rotatedDupesIds )
-	//		{
-	//			mInvalidTags.push_back( dupeId );
-	//		}
-
-	//		//mRecognizedTags.emplace_back( std::move( tag ) );
-	//	}
-	//}
-}
-
-ci::Surface8uRef TagRecognizer::getTagTex( unsigned int const &numTags )
-{
-	return ci::Surface::create( 32, 32, true );
-}
-
-std::vector<std::unique_ptr<Tag>> TagRecognizer::process( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares )
-{
-	mDetectedTags.clear();
-
-	for ( auto const & knownTagType : mRecognizedTagsTypes )
+	TagRecognizer::~TagRecognizer()
 	{
-		// Clone the detection blueprint
-		auto tagDetectionBlueprint = knownTagType->clone();
 
-		for ( auto const & potentialTag : squares )
+	}
+
+	void TagRecognizer::addTagType( std::unique_ptr<Tag> tagDetector )
+	{
+		mRecognizedTagsTypes.emplace_back( std::move( tagDetector ) );
+	}
+
+	void TagRecognizer::generateTags()
+	{
+		//// For now generates MAX tags
+		//unsigned int tagMaxId = 2^( kmBitPatternSize*kmBitPatternSize );
+
+		//for ( unsigned int tagId = 0; tagId < tagMaxId; ++tagId )
+		//{
+		//	auto tag = new TagBitPattern( kmBitPatternSize, tagId );
+
+		//	// Only add if Tag is NOT self-symmetric
+		//	if ( !tag->isSelfSymmetric() )
+		//	{
+		//		auto rotatedDupesIds = tag->getInvalidatedTagIDs();
+
+		//		for ( auto &dupeId : rotatedDupesIds )
+		//		{
+		//			mInvalidTags.push_back( dupeId );
+		//		}
+
+		//		//mRecognizedTags.emplace_back( std::move( tag ) );
+		//	}
+		//}
+	}
+
+	ci::Surface8uRef TagRecognizer::getTagTex( unsigned int const &numTags )
+	{
+		return ci::Surface::create( 32, 32, true );
+	}
+
+	std::vector<std::unique_ptr<Tag>> TagRecognizer::process( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares )
+	{
+		std::vector<std::unique_ptr<Tag>> detectedTags;
+
+		for ( auto const & knownTagType : mRecognizedTagsTypes )
 		{
-			auto tagDetected = tagDetectionBlueprint->detect( binaryImg, potentialTag );
-
-			if ( tagDetected )
+			for ( auto const & potentialTag : squares )
 			{
-				// detect() will have ordered and saved the corner locations of the tag upon detection!
+				auto detectedTag = knownTagType->cloneIfDetected( binaryImg, potentialTag );
 
-				// Blueprint is now a valid tag
-				mDetectedTags.push_back( std::unique_ptr<Tag>( tagDetectionBlueprint ) );
-
-				// Make another blueprint available
-				tagDetectionBlueprint = knownTagType->clone();
+				if ( detectedTag )
+				{
+					detectedTags.emplace_back( std::unique_ptr<Tag>( detectedTag ) );
+				}
 			}
 		}
 
+		// Copy Elision?
+		return detectedTags;
 	}
 
-	return std::move( mDetectedTags );
-}
-
-void TagRecognizer::drawDetectedTags()
-{
-	for ( auto const & detectedTag : mDetectedTags )
+	void TagRecognizer::drawDetectedTags()
 	{
-		detectedTag->draw();
+		//for ( auto const & detectedTag : mDetectedTags )
+		//{
+		//	detectedTag->draw();
+		//}
 	}
-}
+
+};

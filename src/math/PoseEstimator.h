@@ -12,36 +12,40 @@
 #include "cinder/Matrix.h"
 #include <array>
 
-// Forward declarations
-class Homography;
+namespace SimplePose {
 
-class PoseEstimator {
+	// Forward declarations
+	class Homography;
 
-public:
+	class PoseEstimator {
 
-	PoseEstimator( ci::mat3 const & intrinsicCameraParameters );
-	~PoseEstimator();
+	public:
 
-	void estimatePose( ci::vec2 const tagCornerScreenCoords[4] );
+		PoseEstimator( ci::mat3 const & intrinsicCameraParameters );
+		~PoseEstimator();
 
-	ci::mat4 estimateViewMatrix( ci::vec2 const tagCornerScreenCoords[4] );
+		void estimatePose( ci::vec2 const tagCornerScreenCoords[4] );
 
-protected:
-	void extractPositionAndOrientationFromViewMatrix(
-		ci::mat4 const & matViewMatrixVirtualCamera,
-		ci::mat4 const & matViewMatrixEstimatedFromTag );
+		ci::mat4 estimateViewMatrix( ci::vec2 const tagCornerScreenCoords[4] );
 
-	std::array<ci::vec2, 4> mTagVirtualCoords;
+	protected:
+		void extractPositionAndOrientationFromViewMatrix(
+			ci::mat4 const & matViewMatrixVirtualCamera,
+			ci::mat4 const & matViewMatrixEstimatedFromTag );
 
-	ci::mat3 mMatRRTUnscaled;
-	ci::mat3 mMatRRT;
+		std::array<ci::vec2, 4> mTagVirtualCoords;
 
-	ci::mat3 mMatScale;
+		ci::mat3 mMatRRTUnscaled;
+		ci::mat3 mMatRRT;
 
-	ci::mat3 mMatIntrinsicCameraParameters;
-	ci::mat3 mMatIntrinsicCameraParametersInverse;
+		ci::mat3 mMatScale;
 
-	std::unique_ptr<Homography> mHomographyCalculator;
+		ci::mat3 mMatIntrinsicCameraParameters;
+		ci::mat3 mMatIntrinsicCameraParametersInverse;
+
+		std::unique_ptr<Homography> mHomographyCalculator;
+	};
+
 };
 
 #endif /* SIMPLEPOSE_POSEESTIMATOR_H_INCLUDED */
