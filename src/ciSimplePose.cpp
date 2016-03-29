@@ -88,17 +88,39 @@ namespace SimplePose {
 		if ( detectedTags.size() )
 		{
 			TagEvent event;
-			mSignalTagDiscovered.emit( event );
+			bool previouslyUnknownTagsFound = updateTags( detectedTags );
+
+			if ( previouslyUnknownTagsFound )
+				mSignalTagDiscovered.emit( event );
+			
+			mSignalTagUpdated.emit( event );
+
+			mIndividualTagEventDispatcher->sendIndividualEvents( detectedTags );
+		}
+	}
+
+	//! Returns true if new tags were found, otherwise false.
+	bool CiSimplePose::updateTags( std::vector<std::shared_ptr<Tag>> const& detectedTags )
+	{
+		bool previouslyUnknownTagsFound = false;
+
+		for ( auto & detectedTag : detectedTags )
+		{
+			auto detectedTagId = TagId( std::type_index( typeid( detectedTag ) ), detectedTag->getId() );
+			auto knownTag = mKnownTags.find( detectedTagId );
+
+			if ( knownTag != mKnownTags.end() )
+			{
+				// We know this tag / have seen it before
+				knownTag->second->update( detectedTag );
+			}
+			else {
+				mKnownTags[detectedTagId] =  detectedTag;
+				previouslyUnknownTagsFound = true;
+			}
 		}
 
-		// Turn into shared_ptr's and then send off?
-		// XXX: Attend to this next.
-
-		// Updated?
-		//mSignalTagUpdated.emit( event );
-
-		// Individual update emit!
-		//mIndividualTagEventDispatcher->sendEvent( event );
+		return previouslyUnknownTagsFound;
 	}
 
 	ci::Surface8uRef CiSimplePose::getTagTex( unsigned int const &numTags ) { return mTagRecognizer->getTagTex( numTags ); };
@@ -149,7 +171,7 @@ namespace SimplePose {
 	}
 
 	// Fix to not use unique_ptr. Probably not worth it.
-	std::vector<std::unique_ptr<Tag>> CiSimplePose::detectTags( ci::Surface8uRef const& surface )
+	std::vector<std::shared_ptr<Tag>> CiSimplePose::detectTags( ci::Surface8uRef const& surface )
 	{
 		mContoursTagSized.clear();
 		mPolygonsConvex.clear();
@@ -164,7 +186,7 @@ namespace SimplePose {
 		mTexBinary->update( *mImgBinary );
 
 		// End early to find load...
-		return std::vector<std::unique_ptr<Tag>>();
+		return std::vector<std::shared_ptr<Tag>>();
 
 		// Detect Contours
 		mContourFinder->process( mImgBinary );

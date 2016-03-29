@@ -13,6 +13,9 @@
 #include "cinder/gl/Texture.h"
 #include "cinder/Camera.h"
 
+#include <unordered_map>
+#include <typeindex>
+
 #include "cinder/Timer.h"	// For performance measurements/improvements only
 
 #include "tag/Tag.h"
@@ -90,14 +93,16 @@ namespace SimplePose {
 
 	protected:
 
-		std::vector<std::unique_ptr<Tag>> detectTags( ci::Surface8uRef const& surface );
+		std::vector<std::shared_ptr<Tag>> detectTags( ci::Surface8uRef const& surface );
 
 		ci::Channel8uRef processIncomingToGrayscale( ci::Surface8uRef surface );
 		void processGrayscaleToBinary( ci::Surface8uRef surface );
 		void detectSquaresInBinary( ci::Surface8uRef surface );
 		void detectTagsInSquares( ci::Surface8uRef surface );
 
-		ci::Channel8uRef mImgGrayScale, mImgBinary;		// These images only require a single color channel
+		bool updateTags( std::vector<std::shared_ptr<Tag>> const& detectedTags );
+
+		ci::Channel8uRef mImgGrayScale, mImgBinary;						// These images only require a single color channel
 		ci::Surface8uRef mImgContours, mImgSquares, mImgTags;			// These images 'need' color to better differentiate detected elements
 		ci::gl::Texture2dRef mTexGrayscale, mTexBinary, mTexContours, mTexSquares, mTexTags, mTexDebug;
 
@@ -122,7 +127,7 @@ namespace SimplePose {
 
 		std::unique_ptr<PoseEstimator> mPoseEstimator;
 
-		std::vector<Tag> mKnownTags;
+		std::unordered_map<TagId, std::shared_ptr<Tag>> mKnownTags;
 
 		// AR Callback
 		EventTag mSignalTagDiscovered;

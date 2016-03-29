@@ -29,7 +29,7 @@ namespace SimplePose {
 		TagRecognizer( );
 		~TagRecognizer();
 
-		std::vector<std::unique_ptr<Tag>> process( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares );
+		std::vector<std::shared_ptr<Tag>> process( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares );
 
 		void addTagType( std::unique_ptr<Tag> tagDetector );
 

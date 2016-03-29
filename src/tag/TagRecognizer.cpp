@@ -59,9 +59,9 @@ namespace SimplePose {
 		return ci::Surface::create( 32, 32, true );
 	}
 
-	std::vector<std::unique_ptr<Tag>> TagRecognizer::process( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares )
+	std::vector<std::shared_ptr<Tag>> TagRecognizer::process( ci::Channel8uRef binaryImg, std::vector<Polygon> const & squares )
 	{
-		std::vector<std::unique_ptr<Tag>> detectedTags;
+		std::vector<std::shared_ptr<Tag>> detectedTags;
 
 		for ( auto const & knownTagType : mRecognizedTagsTypes )
 		{
@@ -71,7 +71,7 @@ namespace SimplePose {
 
 				if ( detectedTag )
 				{
-					detectedTags.emplace_back( std::unique_ptr<Tag>( detectedTag ) );
+					detectedTags.emplace_back( std::shared_ptr<Tag>( detectedTag ) );
 				}
 			}
 		}

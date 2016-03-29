@@ -24,8 +24,8 @@ namespace SimplePose {
 	public:
 
 		// Fake remove soon
-		TagBitPattern( bool fakery, unsigned int const &debugInt ) :
-			Tag( fakery, debugInt ),
+		TagBitPattern( ) :
+			Tag( ),
 			mBitPatternValue( 0 ),
 			kmBitPatternDimSize( 4 )
 		{
@@ -36,7 +36,7 @@ namespace SimplePose {
 			TagBitPattern( bitPatternDimSize, 0 ) {}
 
 		TagBitPattern( unsigned short const &bitPatternDimSize, unsigned long long const &id ) :
-			Tag( id ),
+			Tag( std::type_index( typeid( TagBitPattern ) ), id ),
 			mBitPatternValue( 0 ),
 			kmBitPatternDimSize( bitPatternDimSize )
 		{

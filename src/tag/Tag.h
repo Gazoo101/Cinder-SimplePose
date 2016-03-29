@@ -12,6 +12,8 @@
 //#include "cinder/Noncopyable.h"
 #include <vector>
 #include <bitset>
+#include <memory>
+#include <typeindex>
 
 #include "cinder/gl/Texture.h"
 
@@ -20,66 +22,41 @@ namespace SimplePose {
 	// Forward declarations
 	struct Polygon;
 
-	class Tag
+	struct TagId
+	{
+		TagId() :
+			kmType( std::type_index( typeid( nullptr ) ) ),
+			kmId( 0 ) {};
+
+		TagId( std::type_index type, unsigned long long id ) :
+			kmType( type ),
+			kmId( id ) {};
+
+		unsigned long long const kmId;
+		std::type_index const kmType;
+
+		bool operator==( TagId const& other ) const
+		{
+			return ( kmType == other.kmType &&
+				kmId == other.kmId );
+		}
+
+	};
+
+	class Tag : public std::enable_shared_from_this<Tag>
 	{
 
 	public:
 
 		Tag() :
-			kmId( 0 )
+			mTagId( )
 		{
 
 		}
 
-		Tag( unsigned long long const &id ) :
-			kmId( id )
+		Tag( std::type_index type, unsigned long long const &id ) :
+			mTagId( type, id )
 		{
-
-		}
-
-		Tag( bool fakery, int debugInt ) :
-			kmId( 0 )
-		{
-			// Currently in clock-wise order... Why?
-			//mPosCorners[0] = ci::vec2( 213, 151 );
-			//mPosCorners[1] = ci::vec2( 354, 175 );
-			//mPosCorners[2] = ci::vec2( 335, 300 );
-			//mPosCorners[3] = ci::vec2( 171, 270 );
-
-			// Change to Counter clock-wise - should be same order as the virtual points we've designated
-			switch ( debugInt )
-			{
-			case 0:
-
-				mPosCorners[0] = ci::vec2( 300, 300 );
-				mPosCorners[1] = ci::vec2( 300, 100 );
-				mPosCorners[2] = ci::vec2( 100, 100 );
-				mPosCorners[3] = ci::vec2( 100, 300 );
-
-				break;
-			case 1:
-
-				mPosCorners[0] = ci::vec2( 400, 400 );
-				mPosCorners[1] = ci::vec2( 400, 200 );
-				mPosCorners[2] = ci::vec2( 200, 200 );
-				mPosCorners[3] = ci::vec2( 200, 400 );
-
-				break;
-			case 2:
-
-				//mPosCorners[0] = ci::vec2(213, 151);
-				//mPosCorners[1] = ci::vec2(171, 270);
-				//mPosCorners[2] = ci::vec2(335, 300);
-				//mPosCorners[3] = ci::vec2(354, 175);
-
-				mPosCorners[0] = ci::vec2( 335, 300 );
-				mPosCorners[1] = ci::vec2( 354, 175 );
-				mPosCorners[2] = ci::vec2( 213, 151 );
-				mPosCorners[3] = ci::vec2( 171, 270 );
-
-				break;
-			}
-
 
 		}
 
@@ -89,6 +66,10 @@ namespace SimplePose {
 			RECOGNIZED
 		};
 
+		unsigned long long getId() const { return mTagId.kmId; };
+		std::type_index getType() const { return mTagId.kmType; };
+		TagId getTagId() const { return mTagId; };
+
 		virtual void draw() const = 0;
 
 		virtual Tag * clone() = 0;
@@ -97,6 +78,12 @@ namespace SimplePose {
 		virtual Tag * cloneIfDetected( ci::Channel8uRef const& binaryImg, Polygon const & potentialTagOutline ) = 0;
 
 		std::array<ci::vec2, 4> const getPosCornersScreencoords() const { return mPosCorners; };
+
+		virtual void update( std::shared_ptr<Tag> const& detectedTag )
+		{
+			// Fix
+			mPosCorners = detectedTag->mPosCorners;
+		}
 
 		//// Move Operators!
 		//Tag( Tag&& other ) :
@@ -111,13 +98,38 @@ namespace SimplePose {
 
 		std::array<ci::vec2, 4> mPosCorners;
 
+		TagId mTagId;
+
 		// Does rotating the tag 90Deg ever result in exactly the same pattern?
 		//virtual bool isSelfSymmetric() = 0;
 		//virtual std::vector<unsigned long long> getInvalidatedTagIDs() = 0;
 
-		unsigned long long const kmId;
+		//unsigned long long const kmId;
 	};
 
 };
+
+// Define Hash function for TagId
+namespace std {
+
+	template <>
+	struct hash<SimplePose::TagId>
+	{
+		std::size_t operator()( SimplePose::TagId const& k ) const
+		{
+			using std::size_t;
+			using std::hash;
+			using std::string;
+
+			// Compute individual hash values for first,
+			// second and third and combine them using XOR
+			// and bit shifting:
+
+			return ( hash<std::type_index>()( k.kmType )
+				^ ( hash<unsigned long long>()( k.kmId ) ) << 1 );
+		}
+	};
+
+}
 
 #endif /* SIMPLEPOSE_TAG */
