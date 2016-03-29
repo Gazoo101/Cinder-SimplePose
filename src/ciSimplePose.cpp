@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2015, Lasse Farnung Laursen - http://www.lasselaursen.com
+* Copyright (c) 2015-2016, Lasse Farnung Laursen - http://www.lasselaursen.com
 *
 * This file is a part of SimplePose, and subject to the new and revised BSD license.
 * Please see the LICENSE file for more information.
@@ -170,7 +170,6 @@ namespace SimplePose {
 		detectTags( surface );
 	}
 
-	// Fix to not use unique_ptr. Probably not worth it.
 	std::vector<std::shared_ptr<Tag>> CiSimplePose::detectTags( ci::Surface8uRef const& surface )
 	{
 		mContoursTagSized.clear();
@@ -190,6 +189,10 @@ namespace SimplePose {
 
 		// Detect Contours
 		mContourFinder->process( mImgBinary );
+
+		
+
+		
 
 		// Filter contours that aren't big enough and aren't outer contours
 		auto contours = mContourFinder->getContours();
@@ -261,7 +264,10 @@ namespace SimplePose {
 
 	void CiSimplePose::drawTagsAll() const
 	{
-		mTagRecognizer->drawDetectedTags();
+		for ( auto & knownTag : mKnownTags )
+		{
+			knownTag.second->draw();
+		}
 	}
 
 	ci::Channel8uRef CiSimplePose::processIncomingToGrayscale( ci::Surface8uRef surface )

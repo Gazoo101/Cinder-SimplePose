@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2015, Lasse Farnung Laursen - http://www.lasselaursen.com
+* Copyright (c) 2015-2016, Lasse Farnung Laursen - http://www.lasselaursen.com
 *
 * This file is a part of SimplePose, and subject to the new and revised BSD license.
 * Please see the LICENSE file for more information.
@@ -35,16 +35,13 @@ namespace SimplePose {
 
 		ci::Surface8uRef getTagTex( unsigned int const &numTags );
 
-		void drawDetectedTags();
-
 	private:
 
 		void generateTags();
 
 		std::vector<std::unique_ptr<Tag>> mRecognizedTagsTypes;
-		//std::vector<std::unique_ptr<Tag>> mDetectedTags;
 
-		//std::vector<Tag> mRecognizedTags;
+		// Should be moved into TagBitPattern
 		std::vector<unsigned long long> mInvalidTags;
 
 	};
